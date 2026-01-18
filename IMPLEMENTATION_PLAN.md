@@ -164,61 +164,62 @@
 
 ---
 
-### Phase 2: Property Management (Week 2)
+### Phase 2: Property Management (Week 2) ✅ COMPLETE
 
 **Goal**: Complete EPIC 1 - Core asset management
 
-#### 2.1 Application Layer - Property Commands
+#### 2.1 Application Layer - Property Commands ✅
 
-- [ ] `CreatePropertyCommand` + Handler
-- [ ] `UpdatePropertyCommand` + Handler
-- [ ] `DeletePropertyCommand` (soft delete) + Handler
-- [ ] `PublishPropertyCommand` + Handler
-- [ ] `UploadPropertyImageCommand` + Handler
-- [ ] `DeletePropertyImageCommand` + Handler
-- [ ] `SetMainImageCommand` + Handler
-- [ ] Validators for each command
+- [x] `CreatePropertyCommand` + Handler
+- [x] `UpdatePropertyCommand` + Handler
+- [x] `DeletePropertyCommand` (soft delete) + Handler
+- [x] `PublishPropertyCommand` + Handler
+- [x] `UploadPropertyImageCommand` + Handler
+- [x] `DeletePropertyImageCommand` + Handler
+- [x] `SetMainImageCommand` + Handler
+- [x] Validators for each command
 
-#### 2.2 Application Layer - Property Queries
+#### 2.2 Application Layer - Property Queries ✅
 
-- [ ] `GetPropertyByIdQuery` + Handler
-- [ ] `GetPropertiesQuery` (with filters, pagination) + Handler
-- [ ] `SearchPropertiesQuery` + Handler
-- [ ] Property DTOs (List, Detail, Create, Update)
+- [x] `GetPropertyByIdQuery` + Handler
+- [x] `GetPropertiesQuery` (with filters, pagination) + Handler
+- [x] `SearchPropertiesQuery` + Handler
+- [x] Property DTOs (List, Detail, Create, Update)
 
-#### 2.3 Application Layer - Mapping
+#### 2.3 Application Layer - Mapping ✅
 
-- [ ] AutoMapper profile: Property ↔ DTOs
+- [x] AutoMapper profile: Property ↔ DTOs
 
-#### 2.4 Web Layer - ViewModels
+#### 2.4 Web Layer - ViewModels ✅
 
-- [ ] `PropertyListViewModel`
-- [ ] `PropertyDetailViewModel`
-- [ ] `PropertyCreateViewModel`
-- [ ] `PropertyEditViewModel`
-- [ ] `PropertyImageViewModel`
+- [x] `PropertyListViewModel`
+- [x] `PropertyDetailViewModel`
+- [x] `PropertyCreateViewModel`
+- [x] `PropertyEditViewModel`
+- [x] `PropertyImageViewModel`
+- [x] `PropertySearchViewModel`
 
-#### 2.5 Web Layer - Admin/PropertiesController
+#### 2.5 Web Layer - Admin/PropertiesController ✅
 
-- [ ] Index (list with filters, pagination, sorting)
-- [ ] Create (GET/POST)
-- [ ] Edit (GET/POST)
-- [ ] Delete (POST)
-- [ ] Publish (POST)
-- [ ] UploadImage (POST - AJAX)
-- [ ] DeleteImage (POST - AJAX)
-- [ ] Refactor to use MediatR (thin controllers)
+- [x] Index (list with filters, pagination, sorting)
+- [x] Create (GET/POST)
+- [x] Edit (GET/POST)
+- [x] Delete (GET/POST)
+- [x] Publish (POST)
+- [x] UploadImage (POST)
+- [x] DeleteImage (POST)
+- [x] SetMainImage (POST)
+- [x] Refactored to use MediatR (thin controllers)
 
-#### 2.6 Web Layer - Views
+#### 2.6 Web Layer - Views ✅
 
-- [ ] Admin/Properties/Index.cshtml (table with filters)
-- [ ] Admin/Properties/Create.cshtml (form)
-- [ ] Admin/Properties/Edit.cshtml (form + image gallery)
-- [ ] Admin/Properties/Delete.cshtml (confirmation)
-- [ ] Admin/Properties/\_PropertyForm.cshtml (partial)
-- [ ] Admin/Properties/\_ImageGallery.cshtml (partial)
+- [x] Admin/Properties/Index.cshtml (table with filters)
+- [x] Admin/Properties/Create.cshtml (form)
+- [x] Admin/Properties/Edit.cshtml (form + image gallery)
+- [x] Admin/Properties/Delete.cshtml (confirmation)
+- [x] Admin/Properties/Details.cshtml (view property)
 
-#### 2.7 Public Property Listing
+#### 2.7 Public Property Listing (DEFERRED - Not MVP critical)
 
 - [ ] Public/PropertiesController (Index, Details)
 - [ ] Public/Properties/Index.cshtml (search + filters)

@@ -1,0 +1,193 @@
+@model List<MyRealEstate.Web.Models.PropertyListViewModel>
+
+@{
+    ViewData["Title"] = "Properties";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalCount = ViewBag.TotalCount ?? 0;
+    var statusFilter = ViewBag.StatusFilter;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Properties</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Property
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="0" selected="@(statusFilter?.ToString() == "0")">Draft</option>
+                        <option value="1" selected="@(statusFilter?.ToString() == "1")">Published</option>
+                        <option value="2" selected="@(statusFilter?.ToString() == "2")">Sold</option>
+                        <option value="3" selected="@(statusFilter?.ToString() == "3")">Rented</option>
+                        <option value="4" selected="@(statusFilter?.ToString() == "4")">Archived</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted">Total: @totalCount properties</p>
+            
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Price</th>
+                                <th>Beds/Baths</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var property in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(property.MainImageUrl))
+                                        {
+                                            <img src="@property.MainImageUrl" alt="@property.Title" 
+                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="bi bi-house"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@property.Title</strong><br>
+                                        <small class="text-muted">@property.AreaSqM m²</small>
+                                    </td>
+                                    <td>@property.PropertyType</td>
+                                    <td>@property.City</td>
+                                    <td>
+                                        <strong>@property.Price.ToString("N0") @property.Currency</strong>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-door-closed"></i> @property.Bedrooms
+                                        <i class="bi bi-droplet ms-2"></i> @property.Bathrooms
+                                    </td>
+                                    <td>
+                                        @switch (property.Status)
+                                        {
+                                            case "Draft":
+                                                <span class="badge bg-secondary">Draft</span>
+                                                break;
+                                            case "Published":
+                                                <span class="badge bg-success">Published</span>
+                                                break;
+                                            case "Sold":
+                                                <span class="badge bg-danger">Sold</span>
+                                                break;
+                                            case "Rented":
+                                                <span class="badge bg-warning">Rented</span>
+                                                break;
+                                            case "Archived":
+                                                <span class="badge bg-dark">Archived</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@property.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@property.Id" 
+                                               class="btn btn-outline-primary" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@property.Id" 
+                                               class="btn btn-outline-secondary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@property.Id" 
+                                               class="btn btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-status="@statusFilter">
+                                    Previous
+                                </a>
+                            </li>
+                            
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-status="@statusFilter">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+                            
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-status="@statusFilter">
+                                    Next
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-house display-1 text-muted"></i>
+                    <p class="mt-3 text-muted">No properties found. <a asp-action="Create">Create one now</a></p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

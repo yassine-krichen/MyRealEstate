@@ -36,7 +36,10 @@ public class ExceptionHandlingMiddleware
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         var response = context.Response;
-        response.ContentType = "application/json";
+        
+        // Check if this is an AJAX/API request (wants JSON) or a browser request (wants HTML)
+        var isAjaxRequest = context.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+                           context.Request.Headers["Accept"].ToString().Contains("application/json");
         
         var (statusCode, message, errors) = exception switch
         {
@@ -59,14 +62,32 @@ public class ExceptionHandlingMiddleware
         
         response.StatusCode = (int)statusCode;
         
-        var result = JsonSerializer.Serialize(new
+        if (isAjaxRequest)
         {
-            success = false,
-            message,
-            errors,
-            traceId = context.TraceIdentifier
-        });
-        
-        await response.WriteAsync(result);
+            // Return JSON for AJAX requests
+            response.ContentType = "application/json";
+            var result = JsonSerializer.Serialize(new
+            {
+                success = false,
+                message,
+                errors,
+                traceId = context.TraceIdentifier
+            });
+            await response.WriteAsync(result);
+        }
+        else
+        {
+            // Redirect to error page for browser requests
+            var errorPath = statusCode switch
+            {
+                HttpStatusCode.NotFound => "/Home/NotFound",
+                _ => "/Home/Error"
+            };
+            
+            context.Items["ErrorMessage"] = message;
+            context.Items["TraceId"] = context.TraceIdentifier;
+            
+            context.Response.Redirect(errorPath);
+        }
     }
 }
