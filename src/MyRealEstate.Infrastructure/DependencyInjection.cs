@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MyRealEstate.Application.Interfaces;
 using MyRealEstate.Domain.Entities;
 using MyRealEstate.Infrastructure.Data;
+using MyRealEstate.Infrastructure.Services;
 
 namespace MyRealEstate.Infrastructure;
 
@@ -17,6 +19,9 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(connectionString,
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+        
+        // Register IApplicationDbContext
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         // Add Identity
         services.AddIdentity<User, IdentityRole<Guid>>(options =>
@@ -48,6 +53,12 @@ public static class DependencyInjection
             options.ExpireTimeSpan = TimeSpan.FromHours(24);
             options.SlidingExpiration = true;
         });
+        
+        // Register Infrastructure services
+        services.AddScoped<IFileStorage, LocalFileStorage>();
+        services.AddScoped<IEmailSender, FakeEmailSender>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddHttpContextAccessor();
 
         return services;
     }
