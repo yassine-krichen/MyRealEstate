@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="text-danger" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M11.46 9.646a.5.5 0 0 1-.708.708L8 7.707l-2.753 2.647a.5.5 0 1 1-.693-.72L7.293 7l-2.74-2.634a.5.5 0 0 1 .694-.72L8 6.293l2.753-2.647a.5.5 0 0 1 .707.72L8.707 7l2.753 2.646z"/>
+                        </svg>
+                    </div>
+                    <h1 class="h3 text-danger mb-3">Access Denied</h1>
+                    <p class="text-muted mb-4">
+                        You do not have permission to access this resource.
+                        Please contact the administrator if you believe this is an error.
+                    </p>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                        Return to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,230 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <span class="text-muted">Welcome, @User.Identity?.Name</span>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        <!-- Properties Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Properties</h6>
+                            <h2 class="mb-0">@Model.TotalProperties</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-primary" viewBox="0 0 16 16">
+                                <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 small">
+                        <span class="text-success">@Model.PublishedProperties Published</span> •
+                        <span class="text-warning">@Model.DraftProperties Draft</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inquiries Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Inquiries</h6>
+                            <h2 class="mb-0">@Model.TotalInquiries</h2>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-info" viewBox="0 0 16 16">
+                                <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1h12z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 small">
+                        <span class="text-danger">@Model.NewInquiries New</span> •
+                        <span class="text-warning">@Model.OpenInquiries Open</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deals Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Deals</h6>
+                            <h2 class="mb-0">@Model.TotalDeals</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-success" viewBox="0 0 16 16">
+                                <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 small">
+                        <span class="text-success">@Model.DealsThisMonth This Month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sold Properties Card -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Sold Properties</h6>
+                            <h2 class="mb-0">@Model.SoldProperties</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="text-warning" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="row g-4">
+        <!-- Recent Properties -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Properties</h5>
+                    <a href="@Url.Action("Index", "Properties", new { area = "Admin" })" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentProperties.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Status</th>
+                                        <th>Price</th>
+                                        <th>Created</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var property in Model.RecentProperties)
+                                    {
+                                        <tr>
+                                            <td>@property.Title</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(property.Status.ToString())">
+                                                    @property.Status
+                                                </span>
+                                            </td>
+                                            <td>@property.Price</td>
+                                            <td>@property.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <p class="mb-0">No properties yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Inquiries -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Inquiries</h5>
+                    <a href="@Url.Action("Index", "Inquiries", new { area = "Admin" })" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentInquiries.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Visitor</th>
+                                        <th>Property</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var inquiry in Model.RecentInquiries)
+                                    {
+                                        <tr>
+                                            <td>@inquiry.VisitorName</td>
+                                            <td>@(inquiry.Property?.Title ?? "N/A")</td>
+                                            <td>
+                                                <span class="badge @GetInquiryStatusBadgeClass(inquiry.Status.ToString())">
+                                                    @inquiry.Status
+                                                </span>
+                                            </td>
+                                            <td>@inquiry.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <p class="mb-0">No inquiries yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Published" => "bg-success",
+            "Draft" => "bg-secondary",
+            "Sold" => "bg-primary",
+            "Rented" => "bg-info",
+            "UnderOffer" => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetInquiryStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "New" => "bg-danger",
+            "Assigned" => "bg-info",
+            "InProgress" => "bg-warning",
+            "Answered" => "bg-success",
+            "Closed" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

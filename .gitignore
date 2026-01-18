@@ -1,0 +1,103 @@
+##############################
+# OS-generated files
+##############################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+##############################
+# User-specific files
+##############################
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+##############################
+# Build results
+##############################
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+##############################
+# ASP.NET Core
+##############################
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+##############################
+# Rider
+##############################
+.idea/
+*.sln.iml
+
+##############################
+# Visual Studio
+##############################
+.vs/
+.vscode/
+
+##############################
+# NuGet
+##############################
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+.nuget/packages/
+
+##############################
+# Publish output
+##############################
+publish/
+wwwroot/lib/
+
+##############################
+# Node / frontend tooling (common with Razor)
+##############################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+##############################
+# Environment files
+##############################
+.env
+.env.*
+
+##############################
+# Test results
+##############################
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+##############################
+# Temporary files
+##############################
+*.tmp
+*.temp
+*.swp
+*~
+
+##############################
+# Database files
+##############################
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+##############################
+# Backup files
+##############################
+*.bak
+*.backup
