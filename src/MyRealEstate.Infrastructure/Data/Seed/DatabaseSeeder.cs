@@ -28,11 +28,17 @@ public static class DatabaseSeeder
         // Seed admin user
         await SeedAdminUserAsync(userManager);
 
+        // Seed agent users
+        await SeedAgentUsersAsync(userManager);
+
         // Seed sample content entries
         await SeedContentEntriesAsync(context);
 
         // Seed sample properties
         await SeedPropertiesAsync(context, userManager);
+
+        // Seed inquiries with conversations
+        await SeedInquiriesAsync(context, userManager);
     }
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
@@ -70,6 +76,38 @@ public static class DatabaseSeeder
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, AdminRole);
+            }
+        }
+    }
+
+    private static async Task SeedAgentUsersAsync(UserManager<User> userManager)
+    {
+        var agents = new[]
+        {
+            new { Email = "agent1@myrealestate.com", FullName = "Ahmed Ben Ali", Password = "Agent@123456" },
+            new { Email = "agent2@myrealestate.com", FullName = "Fatma Mansour", Password = "Agent@123456" }
+        };
+
+        foreach (var agentData in agents)
+        {
+            var existingAgent = await userManager.FindByEmailAsync(agentData.Email);
+            if (existingAgent == null)
+            {
+                var agent = new User
+                {
+                    UserName = agentData.Email,
+                    Email = agentData.Email,
+                    FullName = agentData.FullName,
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(agent, agentData.Password);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(agent, AgentRole);
+                }
             }
         }
     }
@@ -230,6 +268,217 @@ public static class DatabaseSeeder
         };
 
         await context.Properties.AddRangeAsync(properties);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedInquiriesAsync(ApplicationDbContext context, UserManager<User> userManager)
+    {
+        if (await context.Inquiries.AnyAsync())
+        {
+            return; // Inquiries already seeded
+        }
+
+        var agent1 = await userManager.FindByEmailAsync("agent1@myrealestate.com");
+        var agent2 = await userManager.FindByEmailAsync("agent2@myrealestate.com");
+        var adminUser = await userManager.FindByEmailAsync("admin@myrealestate.com");
+        
+        if (agent1 == null || agent2 == null || adminUser == null) return;
+
+        // Get some properties to associate with inquiries
+        var properties = await context.Properties.Take(3).ToListAsync();
+        if (!properties.Any()) return;
+
+        var inquiries = new List<Inquiry>
+        {
+            // 1. New inquiry - just received, not yet assigned
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Mohamed Trabelsi",
+                VisitorEmail = "mohamed.trabelsi@email.com",
+                VisitorPhone = "+216 98 765 432",
+                InitialMessage = "Hi, I'm very interested in this luxury villa. Could we schedule a viewing this week? I'm available on Tuesday or Thursday afternoon.",
+                PropertyId = properties[0].Id,
+                Status = InquiryStatus.New,
+                CreatedAt = DateTime.UtcNow.AddHours(-2)
+            },
+
+            // 2. Assigned inquiry - assigned to agent but no response yet
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Salma Hamdi",
+                VisitorEmail = "salma.hamdi@email.com",
+                VisitorPhone = "+216 22 111 222",
+                InitialMessage = "I would like more information about the apartment in Lac 2. Is it still available? What are the monthly charges?",
+                PropertyId = properties[1].Id,
+                Status = InquiryStatus.Assigned,
+                AssignedAgentId = agent1.Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            },
+
+            // 3. In Progress inquiry - agent has replied, conversation ongoing
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Karim Bouazizi",
+                VisitorEmail = "karim.bouazizi@email.com",
+                VisitorPhone = "+216 55 333 444",
+                InitialMessage = "Hello, I saw the house in Sidi Bou Said online. What's the earliest date I could visit? I'm relocating from France next month.",
+                PropertyId = properties[2].Id,
+                Status = InquiryStatus.InProgress,
+                AssignedAgentId = agent2.Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-3)
+            },
+
+            // 4. Answered inquiry - conversation complete, waiting for visitor
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Leila Ben Salem",
+                VisitorEmail = "leila.bensalem@email.com",
+                VisitorPhone = "+216 29 888 999",
+                InitialMessage = "I'm interested in investing in properties in Tunisia. Do you have any other luxury villas available besides the one in La Marsa?",
+                PropertyId = properties[0].Id,
+                Status = InquiryStatus.Answered,
+                AssignedAgentId = agent1.Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-5)
+            },
+
+            // 5. Closed inquiry - fully completed
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Youssef Slimani",
+                VisitorEmail = "youssef.slimani@email.com",
+                VisitorPhone = "+216 97 555 666",
+                InitialMessage = "Is the studio in Carthage pet-friendly? I have a small dog.",
+                PropertyId = properties[0].Id,
+                Status = InquiryStatus.Closed,
+                AssignedAgentId = agent2.Id,
+                CreatedAt = DateTime.UtcNow.AddDays(-10)
+            },
+
+            // 6. New inquiry without property - general inquiry
+            new Inquiry
+            {
+                Id = Guid.NewGuid(),
+                VisitorName = "Amira Khaled",
+                VisitorEmail = "amira.khaled@email.com",
+                VisitorPhone = "+216 24 777 888",
+                InitialMessage = "I'm looking for a 2-bedroom apartment near the beach, budget around 300,000 TND. Do you have anything matching this criteria?",
+                PropertyId = null,
+                Status = InquiryStatus.New,
+                CreatedAt = DateTime.UtcNow.AddHours(-5)
+            }
+        };
+
+        await context.Inquiries.AddRangeAsync(inquiries);
+        await context.SaveChangesAsync();
+
+        // Add conversation messages to inquiry #3 (In Progress)
+        var conversationMessages = new List<ConversationMessage>
+        {
+            // Agent's first response
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[2].Id,
+                Body = "Thank you for your interest, Karim! The house is absolutely stunning and I'd be happy to arrange a viewing. We can schedule it for next Monday at 10 AM or Wednesday at 3 PM. Which works better for you?",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent2.Id,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-2).AddHours(-2)
+            },
+            
+            // Internal note from agent
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[2].Id,
+                Body = "Serious buyer, relocating from France. Need to prepare property documentation in French.",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent2.Id,
+                IsInternalNote = true,
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            },
+
+            // Visitor's follow-up (simulated as agent note for now)
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[2].Id,
+                Body = "Monday at 10 AM would be perfect. Could you also send me more photos of the interior?",
+                SenderType = SenderType.Visitor,
+                SenderUserId = null,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-1).AddHours(-3)
+            },
+
+            // Agent's latest response
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[2].Id,
+                Body = "Perfect! I've scheduled the viewing for Monday, January 22nd at 10 AM. I'll send you additional photos via email shortly. See you then!",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent2.Id,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-1)
+            }
+        };
+
+        // Add conversation to inquiry #4 (Answered)
+        conversationMessages.AddRange(new[]
+        {
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[3].Id,
+                Body = "Hello Leila, thank you for reaching out! Yes, we have several luxury properties that might interest you. I can send you a curated list based on your investment criteria. Could you share your budget range and preferred areas?",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent1.Id,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-4)
+            },
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[3].Id,
+                Body = "High-value client. Flag for VIP treatment.",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent1.Id,
+                IsInternalNote = true,
+                CreatedAt = DateTime.UtcNow.AddDays(-4)
+            }
+        });
+
+        // Add conversation to inquiry #5 (Closed)
+        conversationMessages.AddRange(new[]
+        {
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[4].Id,
+                Body = "Hi Youssef, unfortunately this particular studio doesn't allow pets due to building regulations. However, I can show you other pet-friendly options in nearby areas. Would you like me to send you some alternatives?",
+                SenderType = SenderType.Agent,
+                SenderUserId = agent2.Id,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-9)
+            },
+            new ConversationMessage
+            {
+                Id = Guid.NewGuid(),
+                InquiryId = inquiries[4].Id,
+                Body = "No thank you, I've found something else. Closing inquiry.",
+                SenderType = SenderType.Visitor,
+                SenderUserId = null,
+                IsInternalNote = false,
+                CreatedAt = DateTime.UtcNow.AddDays(-8)
+            }
+        });
+
+        await context.ConversationMessages.AddRangeAsync(conversationMessages);
         await context.SaveChangesAsync();
     }
 }

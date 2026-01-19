@@ -1,0 +1,165 @@
+@model MyRealEstate.Web.Models.InquirySearchViewModel
+@{
+    ViewData["Title"] = "Inquiries";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h2><i class="bi bi-envelope-paper"></i> Inquiries</h2>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="@((int)MyRealEstate.Domain.Enums.InquiryStatus.New)" selected="@(Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.New)">New</option>
+                        <option value="@((int)MyRealEstate.Domain.Enums.InquiryStatus.InProgress)" selected="@(Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.InProgress)">In Progress</option>
+                        <option value="@((int)MyRealEstate.Domain.Enums.InquiryStatus.Closed)" selected="@(Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.Closed)">Closed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Assigned To</label>
+                    <select name="assignedToId" class="form-select">
+                        <option value="">All Agents</option>
+                        @foreach (var agent in ViewBag.Agents)
+                        {
+                            <option value="@agent.Id" selected="@(Model.AssignedToId?.ToString() == agent.Id.ToString())">@agent.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Client name, email, message..." />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Inquiries Table -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Results.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Messages</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var inquiry in Model.Results)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@inquiry.PropertyTitle</strong>
+                                        @if (!string.IsNullOrEmpty(inquiry.PropertyCity))
+                                        {
+                                            <br /><small class="text-muted">@inquiry.PropertyCity</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@inquiry.ClientName</strong>
+                                        <br /><small class="text-muted">@inquiry.ClientEmail</small>
+                                    </td>
+                                    <td>
+                                        @switch (inquiry.Status)
+                                        {
+                                            case MyRealEstate.Domain.Enums.InquiryStatus.New:
+                                                <span class="badge bg-info">New</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.InquiryStatus.InProgress:
+                                                <span class="badge bg-warning">In Progress</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.InquiryStatus.Closed:
+                                                <span class="badge bg-secondary">Closed</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.InquiryStatus.Answered:
+                                                <span class="badge bg-success">Answered</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.InquiryStatus.Assigned:
+                                                <span class="badge bg-primary">Assigned</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(inquiry.AssignedToName))
+                                        {
+                                            <span>@inquiry.AssignedToName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Unassigned</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">@inquiry.MessageCount</span>
+                                    </td>
+                                    <td>
+                                        <small>@inquiry.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@inquiry.Id" class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-status="@Model.Status" asp-route-assignedToId="@Model.AssignedToId" asp-route-searchTerm="@Model.SearchTerm">Previous</a>
+                            </li>
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-status="@Model.Status" asp-route-assignedToId="@Model.AssignedToId" asp-route-searchTerm="@Model.SearchTerm">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-status="@Model.Status" asp-route-assignedToId="@Model.AssignedToId" asp-route-searchTerm="@Model.SearchTerm">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2">No inquiries found</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -50,7 +50,7 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
                                             @Html.AntiForgeryToken()
                                             <button type="submit" class="dropdown-item">Logout</button>
                                         </form>

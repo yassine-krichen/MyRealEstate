@@ -30,18 +30,25 @@ public class Inquiry : BaseEntity, ISoftDelete
     // Business methods for status transitions
     public void AssignToAgent(Guid agentId)
     {
-        if (Status != InquiryStatus.New)
-            throw new InvalidOperationException("Can only assign new inquiries");
+        if (Status == InquiryStatus.Closed)
+            throw new InvalidOperationException("Cannot assign closed inquiries");
         
         AssignedAgentId = agentId;
-        Status = InquiryStatus.Assigned;
+        
+        // Only change status to Assigned if it's New
+        if (Status == InquiryStatus.New)
+        {
+            Status = InquiryStatus.Assigned;
+        }
+        // Keep InProgress status if already in progress
+        
         UpdatedAt = DateTime.UtcNow;
     }
 
     public void StartProgress()
     {
-        if (Status != InquiryStatus.Assigned)
-            throw new InvalidOperationException("Can only start progress on assigned inquiries");
+        if (Status != InquiryStatus.Assigned && Status != InquiryStatus.New)
+            throw new InvalidOperationException("Can only start progress on new or assigned inquiries");
         
         Status = InquiryStatus.InProgress;
         UpdatedAt = DateTime.UtcNow;

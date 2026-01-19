@@ -26,6 +26,34 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var model = new ErrorViewModel 
+        { 
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier 
+        };
+        
+        // Pass exception to view in development mode
+        if (HttpContext.Items.TryGetValue("Exception", out var exception))
+        {
+            ViewData["Exception"] = exception;
+        }
+        
+        if (HttpContext.Items.TryGetValue("ErrorMessage", out var errorMessage))
+        {
+            ViewData["ErrorMessage"] = errorMessage;
+        }
+        
+        if (HttpContext.Items.TryGetValue("StatusCode", out var statusCode))
+        {
+            Response.StatusCode = (int)statusCode;
+        }
+        
+        return View(model);
+    }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult PageNotFound()
+    {
+        Response.StatusCode = 404;
+        return View("NotFound");
     }
 }

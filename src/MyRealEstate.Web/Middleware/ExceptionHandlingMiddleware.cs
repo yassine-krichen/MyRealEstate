@@ -77,15 +77,22 @@ public class ExceptionHandlingMiddleware
         }
         else
         {
-            // Redirect to error page for browser requests
-            var errorPath = statusCode switch
+            // For browser requests, store exception in Items for error page
+            if (_environment.IsDevelopment())
             {
-                HttpStatusCode.NotFound => "/Home/NotFound",
-                _ => "/Home/Error"
-            };
+                context.Items["Exception"] = exception;
+            }
             
             context.Items["ErrorMessage"] = message;
             context.Items["TraceId"] = context.TraceIdentifier;
+            context.Items["StatusCode"] = (int)statusCode;
+            
+            // Redirect to error page for browser requests
+            var errorPath = statusCode switch
+            {
+                HttpStatusCode.NotFound => "/Home/PageNotFound",
+                _ => "/Home/Error"
+            };
             
             context.Response.Redirect(errorPath);
         }

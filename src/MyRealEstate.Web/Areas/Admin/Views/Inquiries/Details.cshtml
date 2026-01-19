@@ -1,0 +1,239 @@
+@model MyRealEstate.Web.Models.InquiryDetailViewModel
+@{
+    ViewData["Title"] = "Inquiry Details";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Inquiries</a></li>
+                    <li class="breadcrumb-item active">Details</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Inquiry Info -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Inquiry Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Status:</strong>
+                        @switch (Model.Status)
+                        {
+                            case MyRealEstate.Domain.Enums.InquiryStatus.New:
+                                <span class="badge bg-info">New</span>
+                                break;
+                            case MyRealEstate.Domain.Enums.InquiryStatus.Assigned:
+                                <span class="badge bg-primary">Assigned</span>
+                                break;
+                            case MyRealEstate.Domain.Enums.InquiryStatus.InProgress:
+                                <span class="badge bg-warning text-dark">In Progress</span>
+                                break;
+                            case MyRealEstate.Domain.Enums.InquiryStatus.Answered:
+                                <span class="badge bg-success">Answered</span>
+                                break;
+                            case MyRealEstate.Domain.Enums.InquiryStatus.Closed:
+                                <span class="badge bg-secondary">Closed</span>
+                                break;
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Property:</strong><br />
+                        <a asp-area="Admin" asp-controller="Properties" asp-action="Details" asp-route-id="@Model.PropertyId">
+                            @Model.PropertyTitle
+                        </a>
+                        @if (!string.IsNullOrEmpty(Model.PropertyCity))
+                        {
+                            <br /><small class="text-muted">@Model.PropertyCity</small>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Client:</strong><br />
+                        @Model.ClientName<br />
+                        <a href="mailto:@Model.ClientEmail">@Model.ClientEmail</a>
+                        @if (!string.IsNullOrEmpty(Model.ClientPhone))
+                        {
+                            <br />
+                            <a href="tel:@Model.ClientPhone">@Model.ClientPhone</a>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Created:</strong><br />
+                        @Model.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm")
+                    </div>
+
+                    @if (Model.RespondedAt.HasValue)
+                    {
+                        <div class="mb-3">
+                            <strong>First Response:</strong><br />
+                            @Model.RespondedAt.Value.ToString("MMMM dd, yyyy 'at' HH:mm")
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <strong>Original Message:</strong><br />
+                        <p class="text-muted mb-0">@Model.Message</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment Card -->
+            @if (Model.Status != MyRealEstate.Domain.Enums.InquiryStatus.Closed)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person-check"></i> Assignment</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.AssignedToId.HasValue)
+                        {
+                            <p><strong>Assigned to:</strong> @Model.AssignedToName</p>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Not assigned yet</p>
+                        }
+
+                        <form asp-action="Assign" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inquiryId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <select name="agentId" class="form-select" required>
+                                    <option value="">-- Select Agent --</option>
+                                    @foreach (var agent in ViewBag.Agents)
+                                    {
+                                        <option value="@agent.Id" selected="@(Model.AssignedToId?.ToString() == agent.Id.ToString())">@agent.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-person-plus"></i> Assign
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Manual Status Change -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-arrow-repeat"></i> Change Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateStatus" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="inquiryId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <label class="form-label">Select Status</label>
+                                <select name="status" class="form-select" required>
+                                    <option value="">-- Select Status --</option>
+                                    @{
+                                        var statusNew = Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.New ? "selected" : "";
+                                        var statusAssigned = Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.Assigned ? "selected" : "";
+                                        var statusInProgress = Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.InProgress ? "selected" : "";
+                                        var statusAnswered = Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.Answered ? "selected" : "";
+                                        var statusClosed = Model.Status == MyRealEstate.Domain.Enums.InquiryStatus.Closed ? "selected" : "";
+                                    }
+                                    <option value="0" selected="@statusNew">New</option>
+                                    <option value="1" selected="@statusAssigned">Assigned</option>
+                                    <option value="2" selected="@statusInProgress">In Progress</option>
+                                    <option value="3" selected="@statusAnswered">Answered</option>
+                                    <option value="4" selected="@statusClosed">Closed</option>
+                                </select>
+                                <div class="form-text">
+                                    <small>
+                                        <i class="bi bi-info-circle"></i>
+                                        <strong>Tip:</strong> Status updates automatically when you assign or reply, but you can change it manually here.
+                                    </small>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-check-circle"></i> Update Status
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Close Inquiry -->
+                <div class="card">
+                    <div class="card-body">
+                        <form asp-action="Close" method="post" onsubmit="return confirm('Are you sure you want to close this inquiry?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-x-circle"></i> Close Inquiry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Conversation -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Conversation</h5>
+                </div>
+                <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                    @if (Model.Messages.Any())
+                    {
+                        @foreach (var message in Model.Messages)
+                        {
+                            <div class="mb-3 @(message.SenderType == MyRealEstate.Domain.Enums.SenderType.Visitor ? "text-start" : "text-end")">
+                                <div class="d-inline-block p-3 rounded @(message.SenderType == MyRealEstate.Domain.Enums.SenderType.Visitor ? "bg-light" : "bg-primary text-white")" style="max-width: 70%;">
+                                    <div class="mb-1">
+                                        <strong>@(message.SenderName ?? (message.SenderType == MyRealEstate.Domain.Enums.SenderType.Visitor ? Model.ClientName : "Agent"))</strong>
+                                        <br />
+                                        <small class="@(message.SenderType == MyRealEstate.Domain.Enums.SenderType.Visitor ? "text-muted" : "text-white-50")">
+                                            @message.SentAt.ToString("MMM dd, yyyy 'at' HH:mm")
+                                        </small>
+                                    </div>
+                                    <p class="mb-0">@message.Message</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No messages yet</p>
+                    }
+                </div>
+
+                @if (Model.Status != MyRealEstate.Domain.Enums.InquiryStatus.Closed)
+                {
+                    <div class="card-footer">
+                        <form asp-action="Reply" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="Id" name="inquiryId" />
+                            <div class="mb-3">
+                                <label class="form-label">Your Reply</label>
+                                <textarea name="message" class="form-control" rows="3" required placeholder="Type your reply here..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send Reply
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
