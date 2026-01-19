@@ -19,29 +19,47 @@ public class DashboardController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var isAdmin = User.IsInRole("Admin");
+        var isAgent = User.IsInRole("Agent");
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        Guid? currentUserId = userId != null ? Guid.Parse(userId) : null;
+
+        // Base queries
+        var propertiesQuery = _context.Properties.AsQueryable();
+        var inquiriesQuery = _context.Inquiries.AsQueryable();
+        var dealsQuery = _context.Deals.AsQueryable();
+
+        // Filter for agents: only their assigned inquiries + unassigned new ones
+        if (isAgent && !isAdmin && currentUserId.HasValue)
+        {
+            inquiriesQuery = inquiriesQuery.Where(i => 
+                i.AssignedAgentId == currentUserId.Value || 
+                (i.AssignedAgentId == null && i.Status == InquiryStatus.New));
+        }
+
         var viewModel = new DashboardViewModel
         {
-            TotalProperties = await _context.Properties.CountAsync(),
-            PublishedProperties = await _context.Properties.CountAsync(p => p.Status == PropertyStatus.Published),
-            DraftProperties = await _context.Properties.CountAsync(p => p.Status == PropertyStatus.Draft),
-            SoldProperties = await _context.Properties.CountAsync(p => p.Status == PropertyStatus.Sold),
+            TotalProperties = await propertiesQuery.CountAsync(),
+            PublishedProperties = await propertiesQuery.CountAsync(p => p.Status == PropertyStatus.Published),
+            DraftProperties = await propertiesQuery.CountAsync(p => p.Status == PropertyStatus.Draft),
+            SoldProperties = await propertiesQuery.CountAsync(p => p.Status == PropertyStatus.Sold),
             
-            TotalInquiries = await _context.Inquiries.CountAsync(),
-            NewInquiries = await _context.Inquiries.CountAsync(i => i.Status == InquiryStatus.New),
-            OpenInquiries = await _context.Inquiries.CountAsync(i => 
+            TotalInquiries = await inquiriesQuery.CountAsync(),
+            NewInquiries = await inquiriesQuery.CountAsync(i => i.Status == InquiryStatus.New),
+            OpenInquiries = await inquiriesQuery.CountAsync(i => 
                 i.Status != InquiryStatus.Closed && i.Status != InquiryStatus.Answered),
             
-            TotalDeals = await _context.Deals.CountAsync(),
-            DealsThisMonth = await _context.Deals.CountAsync(d => 
+            TotalDeals = await dealsQuery.CountAsync(),
+            DealsThisMonth = await dealsQuery.CountAsync(d => 
                 d.ClosedAt >= DateTime.UtcNow.AddDays(-30) && d.Status == DealStatus.Completed),
             
-            RecentInquiries = await _context.Inquiries
+            RecentInquiries = await inquiriesQuery
                 .Include(i => i.Property)
                 .OrderByDescending(i => i.CreatedAt)
                 .Take(5)
                 .ToListAsync(),
             
-            RecentProperties = await _context.Properties
+            RecentProperties = await propertiesQuery
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(5)
                 .ToListAsync()

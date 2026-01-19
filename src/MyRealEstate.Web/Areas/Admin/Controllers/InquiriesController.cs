@@ -31,12 +31,36 @@ public class InquiriesController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(int page = 1, InquiryStatus? status = null, Guid? assignedToId = null, string? searchTerm = null)
     {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var isAdmin = User.IsInRole("Admin");
+        var isAgent = User.IsInRole("Agent");
+
+        // Apply role-based filtering
+        Guid? filterAssignedToId = assignedToId;
+        bool? includeUnassigned = null;
+
+        if (isAgent && !isAdmin)
+        {
+            // Agents can only see:
+            // 1. New unassigned inquiries (Status = New AND AssignedAgentId = null)
+            // 2. Inquiries assigned to them
+            filterAssignedToId = currentUser.Id;
+            includeUnassigned = true; // Also include unassigned
+        }
+        // Admin sees everything (no additional filtering)
+
         var query = new GetInquiriesQuery
         {
             Page = page,
             PageSize = 20,
             Status = status,
-            AssignedToId = assignedToId,
+            AssignedToId = filterAssignedToId,
+            IncludeUnassigned = includeUnassigned,
             SearchTerm = searchTerm
         };
 
@@ -64,11 +88,17 @@ public class InquiriesController : Controller
             }).ToList()
         };
 
-        // Get agents for filter dropdown
-        ViewBag.Agents = (await _userManager.GetUsersInRoleAsync("Agent"))
-            .Where(u => u.IsActive)
-            .Select(u => new { Id = u.Id, Name = u.FullName })
-            .ToList();
+        // Get agents for filter dropdown (Admin only)
+        if (isAdmin)
+        {
+            ViewBag.Agents = (await _userManager.GetUsersInRoleAsync("Agent"))
+                .Where(u => u.IsActive)
+                .Select(u => new { Id = u.Id, Name = u.FullName })
+                .ToList();
+        }
+
+        ViewBag.IsAdmin = isAdmin;
+        ViewBag.CurrentUserId = currentUser.Id;
 
         return View(viewModel);
     }
@@ -82,6 +112,28 @@ public class InquiriesController : Controller
         if (inquiry == null)
         {
             return NotFound();
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var isAdmin = User.IsInRole("Admin");
+        var isAgent = User.IsInRole("Agent");
+
+        // Authorization check: Agents can only view their own inquiries or unassigned new ones
+        if (isAgent && !isAdmin)
+        {
+            var isAssignedToAgent = inquiry.AssignedToId == currentUser.Id;
+            var isUnassignedNew = !inquiry.AssignedToId.HasValue && inquiry.Status == InquiryStatus.New;
+
+            if (!isAssignedToAgent && !isUnassignedNew)
+            {
+                _logger.LogWarning("Agent {AgentId} attempted to access inquiry {InquiryId} they don't have access to", currentUser.Id, id);
+                return Forbid(); // 403 Forbidden
+            }
         }
 
         var viewModel = new InquiryDetailViewModel
@@ -109,17 +161,24 @@ public class InquiriesController : Controller
             }).ToList()
         };
 
-        // Get agents for assignment dropdown
-        ViewBag.Agents = (await _userManager.GetUsersInRoleAsync("Agent"))
-            .Where(u => u.IsActive)
-            .Select(u => new { Id = u.Id, Name = u.FullName })
-            .ToList();
+        // Get agents for assignment dropdown (Admin only)
+        if (isAdmin)
+        {
+            ViewBag.Agents = (await _userManager.GetUsersInRoleAsync("Agent"))
+                .Where(u => u.IsActive)
+                .Select(u => new { Id = u.Id, Name = u.FullName })
+                .ToList();
+        }
+
+        ViewBag.IsAdmin = isAdmin;
+        ViewBag.CurrentUserId = currentUser.Id;
 
         return View(viewModel);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")] // Only Admin can assign agents
     public async Task<IActionResult> Assign(Guid inquiryId, Guid agentId)
     {
         var command = new AssignInquiryCommand
@@ -183,6 +242,32 @@ public class InquiriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(Guid inquiryId, InquiryStatus status)
     {
+        // Authorization check: Agents can only update status of their own inquiries
+        var inquiry = await _mediator.Send(new GetInquiryByIdQuery { Id = inquiryId });
+        if (inquiry == null)
+        {
+            return NotFound();
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var isAdmin = User.IsInRole("Admin");
+        var isAgent = User.IsInRole("Agent");
+
+        // Agents can only update status of inquiries assigned to them
+        if (isAgent && !isAdmin)
+        {
+            if (inquiry.AssignedToId != currentUser.Id)
+            {
+                _logger.LogWarning("Agent {AgentId} attempted to update status of inquiry {InquiryId} not assigned to them", currentUser.Id, inquiryId);
+                return Forbid();
+            }
+        }
+
         var command = new UpdateInquiryStatusCommand
         {
             InquiryId = inquiryId,

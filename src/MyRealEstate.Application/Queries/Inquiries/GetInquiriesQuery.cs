@@ -15,6 +15,11 @@ public record GetInquiriesQuery : IRequest<InquiryListResult>
     public Guid? AssignedToId { get; init; }
     public Guid? PropertyId { get; init; }
     public string? SearchTerm { get; init; }
+    /// <summary>
+    /// When true and AssignedToId is set, also includes unassigned New inquiries.
+    /// Used for agent filtering: show assigned to them OR unassigned new inquiries.
+    /// </summary>
+    public bool? IncludeUnassigned { get; init; }
 }
 
 public class InquiryListResult
@@ -55,9 +60,21 @@ public class GetInquiriesQueryHandler : IRequestHandler<GetInquiriesQuery, Inqui
             query = query.Where(i => i.Status == request.Status.Value);
         }
 
+        // Special handling for agent filtering (assigned to them OR unassigned new)
         if (request.AssignedToId.HasValue)
         {
-            query = query.Where(i => i.AssignedAgentId == request.AssignedToId.Value);
+            if (request.IncludeUnassigned == true)
+            {
+                // Agent view: Show inquiries assigned to them OR unassigned New inquiries
+                query = query.Where(i => 
+                    i.AssignedAgentId == request.AssignedToId.Value ||
+                    (i.AssignedAgentId == null && i.Status == InquiryStatus.New));
+            }
+            else
+            {
+                // Normal filter: Show only inquiries assigned to specific agent
+                query = query.Where(i => i.AssignedAgentId == request.AssignedToId.Value);
+            }
         }
 
         if (request.PropertyId.HasValue)
