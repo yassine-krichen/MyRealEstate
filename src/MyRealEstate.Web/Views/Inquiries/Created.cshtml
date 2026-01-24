@@ -1,0 +1,100 @@
+@model MyRealEstate.Web.Models.InquiryCreatedViewModel
+@{
+    ViewData["Title"] = "Inquiry Submitted Successfully";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+
+                    <!-- Success Message -->
+                    <h1 class="display-5 fw-bold text-success mb-3">Inquiry Submitted!</h1>
+                    <p class="lead text-muted mb-4">
+                        Thank you for your interest. We've received your inquiry and will respond shortly.
+                    </p>
+
+                    <!-- Tracking Information -->
+                    <div class="alert alert-info border-0 shadow-sm mb-4">
+                        <h5 class="alert-heading">
+                            <i class="bi bi-bookmark-star"></i> Save Your Tracking Link
+                        </h5>
+                        <p class="mb-3">
+                            Use this link to track your inquiry and communicate with our agents:
+                        </p>
+                        <div class="input-group input-group-lg mb-3">
+                            <input type="text" class="form-control" id="trackingLink" value="@Model.TrackingUrl" readonly>
+                            <button class="btn btn-primary" type="button" onclick="copyToClipboard()">
+                                <i class="bi bi-clipboard"></i> Copy
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-shield-check"></i> This link is private and secure. Bookmark it for easy access.
+                        </small>
+                    </div>
+
+                    <!-- Email Confirmation -->
+                    <div class="mb-4">
+                        <p class="text-muted">
+                            <i class="bi bi-envelope"></i> 
+                            We've also sent this tracking link to <strong>@Model.VisitorEmail</strong>
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <a href="@Model.TrackingUrl" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-eye"></i> Track My Inquiry
+                        </a>
+                        <a asp-controller="Properties" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-house-door"></i> Browse More Properties
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's Next -->
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-question-circle"></i> What happens next?
+                    </h5>
+                    <ol class="mb-0">
+                        <li class="mb-2">Our team will review your inquiry</li>
+                        <li class="mb-2">An agent will be assigned to assist you</li>
+                        <li class="mb-2">You'll receive a response via the tracking page</li>
+                        <li>You can reply and communicate directly through your tracking link</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyToClipboard() {
+        const input = document.getElementById('trackingLink');
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile devices
+        
+        navigator.clipboard.writeText(input.value).then(() => {
+            // Show feedback
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-success');
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-primary');
+            }, 2000);
+        });
+    }
+</script>

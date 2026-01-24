@@ -1,0 +1,175 @@
+@model MyRealEstate.Web.Models.PublicPropertyListViewModel
+@{
+    ViewData["Title"] = "Browse Properties";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="bi bi-house-door"></i> Browse Properties
+            </h1>
+            <p class="lead text-muted">Find your perfect property from our exclusive listings</p>
+        </div>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="@Model.SearchFilters.City" placeholder="e.g., Tunis">
+                </div>
+                <div class="col-md-3">
+                    <label for="propertyType" class="form-label">Property Type</label>
+                    <select class="form-select" id="propertyType" name="propertyType">
+                        <option value="">All Types</option>
+                        <option value="Villa" selected="@(Model.SearchFilters.PropertyType == "Villa")">Villa</option>
+                        <option value="Apartment" selected="@(Model.SearchFilters.PropertyType == "Apartment")">Apartment</option>
+                        <option value="House" selected="@(Model.SearchFilters.PropertyType == "House")">House</option>
+                        <option value="Studio" selected="@(Model.SearchFilters.PropertyType == "Studio")">Studio</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="minPrice" class="form-label">Min Price (TND)</label>
+                    <input type="number" class="form-control" id="minPrice" name="minPrice" value="@Model.SearchFilters.MinPrice" placeholder="0">
+                </div>
+                <div class="col-md-2">
+                    <label for="maxPrice" class="form-label">Max Price (TND)</label>
+                    <input type="number" class="form-control" id="maxPrice" name="maxPrice" value="@Model.SearchFilters.MaxPrice" placeholder="999999">
+                </div>
+                <div class="col-md-2">
+                    <label for="minBedrooms" class="form-label">Min Bedrooms</label>
+                    <input type="number" class="form-control" id="minBedrooms" name="minBedrooms" value="@Model.SearchFilters.MinBedrooms" min="1" max="10">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    @if (Model.Properties.TotalCount > 0)
+    {
+        <div class="mb-3">
+            <p class="text-muted">
+                Showing @Model.Properties.Items.Count of @Model.Properties.TotalCount properties
+            </p>
+        </div>
+    }
+
+    <!-- Property Grid -->
+    @if (Model.Properties.Items.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+            @foreach (var property in Model.Properties.Items)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm hover-lift">
+                        @if (!string.IsNullOrEmpty(property.MainImageUrl))
+                        {
+                            <img src="@property.MainImageUrl" class="card-img-top" alt="@property.Title" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-house-door text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate" title="@property.Title">@property.Title</h5>
+                            <p class="text-primary fw-bold fs-4 mb-2">
+                                @property.Price.ToString("N0") @property.Currency
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-geo-alt"></i> @property.City
+                            </p>
+                            <div class="d-flex gap-3 text-muted small mb-3">
+                                <span><i class="bi bi-door-open"></i> @property.Bedrooms BD</span>
+                                <span><i class="bi bi-droplet"></i> @property.Bathrooms BA</span>
+                                <span><i class="bi bi-arrows-fullscreen"></i> @property.AreaSqM m²</span>
+                            </div>
+                            <span class="badge bg-secondary">@property.PropertyType</span>
+                        </div>
+                        <div class="card-footer bg-white border-0">
+                            <a asp-action="Details" asp-route-id="@property.Id" class="btn btn-primary w-100">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.Properties.TotalPages > 1)
+        {
+            <nav aria-label="Property pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.Properties.PageNumber == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Properties.PageNumber - 1)"
+                           asp-route-city="@Model.SearchFilters.City"
+                           asp-route-propertyType="@Model.SearchFilters.PropertyType"
+                           asp-route-minPrice="@Model.SearchFilters.MinPrice"
+                           asp-route-maxPrice="@Model.SearchFilters.MaxPrice"
+                           asp-route-minBedrooms="@Model.SearchFilters.MinBedrooms">
+                            Previous
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= Model.Properties.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Properties.PageNumber ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@i"
+                               asp-route-city="@Model.SearchFilters.City"
+                               asp-route-propertyType="@Model.SearchFilters.PropertyType"
+                               asp-route-minPrice="@Model.SearchFilters.MinPrice"
+                               asp-route-maxPrice="@Model.SearchFilters.MaxPrice"
+                               asp-route-minBedrooms="@Model.SearchFilters.MinBedrooms">
+                                @i
+                            </a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.Properties.PageNumber == Model.Properties.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Properties.PageNumber + 1)"
+                           asp-route-city="@Model.SearchFilters.City"
+                           asp-route-propertyType="@Model.SearchFilters.PropertyType"
+                           asp-route-minPrice="@Model.SearchFilters.MinPrice"
+                           asp-route-maxPrice="@Model.SearchFilters.MaxPrice"
+                           asp-route-minBedrooms="@Model.SearchFilters.MinBedrooms">
+                            Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+            <h3 class="mt-3 text-muted">No properties found</h3>
+            <p class="text-muted">Try adjusting your search filters</p>
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i> Clear Filters
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
+    }
+</style>

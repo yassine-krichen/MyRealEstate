@@ -2,7 +2,99 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container text-center py-5">
+        <h1 class="display-3 fw-bold mb-3">Find Your Dream Property</h1>
+        <p class="lead mb-4">
+            Discover exclusive real estate listings in Tunisia's most sought-after locations
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <a asp-controller="Properties" asp-action="Index" class="btn btn-light btn-lg px-5">
+                <i class="bi bi-search"></i> Browse Properties
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-house-heart text-primary" style="font-size: 3rem;"></i>
+                <h3 class="h5 mt-3">Premium Listings</h3>
+                <p class="text-muted">
+                    Curated selection of high-quality properties in prime locations
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-headset text-primary" style="font-size: 3rem;"></i>
+                <h3 class="h5 mt-3">Expert Support</h3>
+                <p class="text-muted">
+                    Our dedicated agents are here to guide you every step of the way
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+                <h3 class="h5 mt-3">Secure Process</h3>
+                <p class="text-muted">
+                    Safe and transparent transactions with complete peace of mind
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold">How It Works</h2>
+            <p class="lead text-muted">Simple steps to find your perfect property</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                    1
+                </div>
+                <h5>Browse Properties</h5>
+                <p class="text-muted">Explore our curated listings</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                    2
+                </div>
+                <h5>Submit Inquiry</h5>
+                <p class="text-muted">Fill out a simple form</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                    3
+                </div>
+                <h5>Get Tracking Link</h5>
+                <p class="text-muted">Follow your inquiry status</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold;">
+                    4
+                </div>
+                <h5>Connect with Agent</h5>
+                <p class="text-muted">Start your property journey</p>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <a asp-controller="Properties" asp-action="Index" class="btn btn-primary btn-lg">
+                Get Started Now <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
 </div>

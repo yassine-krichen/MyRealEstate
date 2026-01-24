@@ -13,6 +13,9 @@ public class Inquiry : BaseEntity, ISoftDelete
     public string? VisitorPhone { get; set; }
     public string InitialMessage { get; set; } = string.Empty;
     
+    // Secure access token for visitors to track their inquiry
+    public string AccessToken { get; set; } = string.Empty;
+    
     public InquiryStatus Status { get; set; } = InquiryStatus.New;
     
     public Guid? AssignedAgentId { get; set; }

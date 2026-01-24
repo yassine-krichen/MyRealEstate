@@ -1,0 +1,250 @@
+@model MyRealEstate.Web.Models.InquiryTrackingViewModel
+@using MyRealEstate.Domain.Enums
+@{
+    ViewData["Title"] = "Track Your Inquiry";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Inquiry Details -->
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="h3 mb-2">
+                                <i class="bi bi-chat-dots"></i> Your Inquiry
+                            </h1>
+                            <p class="text-muted mb-0">
+                                Submitted on @Model.Inquiry.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt")
+                            </p>
+                        </div>
+                        <span class="badge @GetStatusBadgeClass(Model.Inquiry.Status) fs-6">
+                            @Model.Inquiry.Status.ToString()
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Inquiry.PropertyTitle))
+                    {
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="text-muted mb-1">Property:</h6>
+                            <h5 class="mb-0">
+                                <i class="bi bi-house-door"></i> @Model.Inquiry.PropertyTitle
+                            </h5>
+                            @if (!string.IsNullOrEmpty(Model.Inquiry.PropertyCity))
+                            {
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> @Model.Inquiry.PropertyCity
+                                </small>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-text"></i> Conversation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Initial Message -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 40px; height: 40px; flex-shrink: 0;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <strong>@Model.Inquiry.ClientName</strong>
+                                        <span class="badge bg-secondary ms-2">Initial Message</span>
+                                    </div>
+                                    <small class="text-muted">@Model.Inquiry.CreatedAt.ToString("MMM dd, hh:mm tt")</small>
+                                </div>
+                                <div class="bg-light p-3 rounded">
+                                    @Model.Inquiry.Message
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Follow-up Messages -->
+                    @if (Model.Inquiry.Messages.Any())
+                    {
+                        @foreach (var message in Model.Inquiry.Messages)
+                        {
+                            var isVisitor = message.SenderType == SenderType.Visitor;
+                            <div class="mb-3 @(isVisitor ? "" : "pb-3 border-bottom")">
+                                <div class="d-flex align-items-start @(isVisitor ? "flex-row-reverse" : "")">
+                                    <div class="@(isVisitor ? "bg-success" : "bg-info") text-white rounded-circle d-flex align-items-center justify-content-center @(isVisitor ? "ms-3" : "me-3")" 
+                                         style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <i class="bi @(isVisitor ? "bi-person" : "bi-headset")"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-2 @(isVisitor ? "flex-row-reverse" : "")">
+                                            <div>
+                                                <strong>@(message.SenderName ?? (isVisitor ? "You" : "Agent"))</strong>
+                                                <span class="badge @(isVisitor ? "bg-success" : "bg-info") ms-2">
+                                                    @message.SenderType.ToString()
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">@message.SentAt.ToString("MMM dd, hh:mm tt")</small>
+                                        </div>
+                                        <div class="@(isVisitor ? "bg-success bg-opacity-10 text-end" : "bg-light") p-3 rounded">
+                                            @message.Message
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (Model.Inquiry.Status != InquiryStatus.New)
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass-split"></i>
+                            <p class="mb-0">Waiting for agent response...</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Reply Form -->
+            @if (Model.CanReply)
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-reply"></i> Send a Reply
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Inquiries" asp-action="AddMessage" method="post">
+                            <input type="hidden" name="Token" value="@Model.Token" />
+                            <div class="mb-3">
+                                <textarea name="Message" id="Message" class="form-control" rows="4" 
+                                          placeholder="Type your message here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <i class="bi bi-lock"></i> This inquiry is closed. No further messages can be sent.
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Contact Info -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Your Contact Information</h6>
+                    <p class="mb-1">
+                        <i class="bi bi-person"></i> <strong>@Model.Inquiry.ClientName</strong>
+                    </p>
+                    <p class="mb-1">
+                        <i class="bi bi-envelope"></i> @Model.Inquiry.ClientEmail
+                    </p>
+                    @if (!string.IsNullOrEmpty(Model.Inquiry.ClientPhone))
+                    {
+                        <p class="mb-0">
+                            <i class="bi bi-telephone"></i> @Model.Inquiry.ClientPhone
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Assigned Agent -->
+            @if (Model.Inquiry.AssignedToId.HasValue && !string.IsNullOrEmpty(Model.Inquiry.AssignedToName))
+            {
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Assigned Agent</h6>
+                        <p class="mb-0">
+                            <i class="bi bi-person-badge"></i> <strong>@Model.Inquiry.AssignedToName</strong>
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            @if (Model.Inquiry.Status != InquiryStatus.Closed)
+            {
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Actions</h6>
+                        @if (Model.Inquiry.Status == InquiryStatus.Answered || Model.Inquiry.Status == InquiryStatus.InProgress)
+                        {
+                            <form asp-controller="Inquiries" asp-action="MarkAnswered" method="post" class="mb-2">
+                                <input type="hidden" name="token" value="@Model.Token" />
+                                <button type="submit" class="btn btn-success btn-sm w-100">
+                                    <i class="bi bi-check-circle"></i> Mark as Answered
+                                </button>
+                            </form>
+                        }
+                        <form asp-controller="Inquiries" asp-action="Close" method="post" 
+                              onsubmit="return confirm('Are you sure you want to close this inquiry? You won\'t be able to send more messages.')">
+                            <input type="hidden" name="token" value="@Model.Token" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-x-circle"></i> Close Inquiry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+
+            <!-- Info -->
+            <div class="card shadow-sm bg-light border-0">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">
+                        <i class="bi bi-info-circle"></i> Need Help?
+                    </h6>
+                    <p class="small mb-0">
+                        Bookmark this page to easily track your inquiry. Our agents typically respond within 24 hours.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeClass(InquiryStatus status)
+    {
+        return status switch
+        {
+            InquiryStatus.New => "bg-primary",
+            InquiryStatus.Assigned => "bg-info",
+            InquiryStatus.InProgress => "bg-warning text-dark",
+            InquiryStatus.Answered => "bg-success",
+            InquiryStatus.Closed => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+}

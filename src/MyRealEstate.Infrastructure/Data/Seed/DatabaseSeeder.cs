@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyRealEstate.Domain.Entities;
 using MyRealEstate.Domain.Enums;
 using MyRealEstate.Domain.ValueObjects;
+using System.Security.Cryptography;
 
 namespace MyRealEstate.Infrastructure.Data.Seed;
 
@@ -300,6 +301,7 @@ public static class DatabaseSeeder
                 InitialMessage = "Hi, I'm very interested in this luxury villa. Could we schedule a viewing this week? I'm available on Tuesday or Thursday afternoon.",
                 PropertyId = properties[0].Id,
                 Status = InquiryStatus.New,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddHours(-2)
             },
 
@@ -314,6 +316,7 @@ public static class DatabaseSeeder
                 PropertyId = properties[1].Id,
                 Status = InquiryStatus.Assigned,
                 AssignedAgentId = agent1.Id,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddDays(-1)
             },
 
@@ -328,6 +331,7 @@ public static class DatabaseSeeder
                 PropertyId = properties[2].Id,
                 Status = InquiryStatus.InProgress,
                 AssignedAgentId = agent2.Id,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddDays(-3)
             },
 
@@ -342,6 +346,7 @@ public static class DatabaseSeeder
                 PropertyId = properties[0].Id,
                 Status = InquiryStatus.Answered,
                 AssignedAgentId = agent1.Id,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddDays(-5)
             },
 
@@ -356,6 +361,7 @@ public static class DatabaseSeeder
                 PropertyId = properties[0].Id,
                 Status = InquiryStatus.Closed,
                 AssignedAgentId = agent2.Id,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddDays(-10)
             },
 
@@ -369,6 +375,7 @@ public static class DatabaseSeeder
                 InitialMessage = "I'm looking for a 2-bedroom apartment near the beach, budget around 300,000 TND. Do you have anything matching this criteria?",
                 PropertyId = null,
                 Status = InquiryStatus.New,
+                AccessToken = GenerateAccessToken(),
                 CreatedAt = DateTime.UtcNow.AddHours(-5)
             }
         };
@@ -480,5 +487,18 @@ public static class DatabaseSeeder
 
         await context.ConversationMessages.AddRangeAsync(conversationMessages);
         await context.SaveChangesAsync();
+    }
+
+    private static string GenerateAccessToken()
+    {
+        var randomBytes = new byte[24];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+        }
+        return Convert.ToBase64String(randomBytes)
+            .Replace("+", "-")
+            .Replace("/", "_")
+            .Replace("=", "");
     }
 }
