@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyRealEstate.Application.Interfaces;
 using MyRealEstate.Domain.Entities;
 using MyRealEstate.Infrastructure.Data;
+using MyRealEstate.Infrastructure.Repositories;
 using MyRealEstate.Infrastructure.Services;
 
 namespace MyRealEstate.Infrastructure;
@@ -58,6 +59,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorage, LocalFileStorage>();
         services.AddScoped<IEmailSender, FakeEmailSender>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IPropertyViewRepository, PropertyViewRepository>();
         services.AddHttpContextAccessor();
 
         return services;

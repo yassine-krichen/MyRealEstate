@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MyRealEstate.Application.Commands.Analytics;
 using MyRealEstate.Application.Queries.Properties;
 using MyRealEstate.Domain.Enums;
 using MyRealEstate.Web.Models;
@@ -69,6 +70,31 @@ public class PropertiesController : Controller
         {
             return NotFound();
         }
+
+        // Record property view for analytics (fire and forget)
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var sessionId = HttpContext.Session.Id;
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+
+                var viewCommand = new RecordPropertyViewCommand
+                {
+                    PropertyId = id,
+                    SessionId = sessionId,
+                    IpAddress = ipAddress,
+                    UserAgent = userAgent
+                };
+
+                await _mediator.Send(viewCommand);
+            }
+            catch
+            {
+                // Silently fail if view tracking fails
+            }
+        });
 
         var viewModel = new PublicPropertyDetailViewModel
         {

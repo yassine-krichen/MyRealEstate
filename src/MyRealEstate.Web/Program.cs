@@ -26,6 +26,15 @@ try
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
 
+    // Add session support for PropertyView tracking
+    builder.Services.AddDistributedMemoryCache();
+    builder.Services.AddSession(options =>
+    {
+        options.IdleTimeout = TimeSpan.FromHours(2);
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+    });
+
     var app = builder.Build();
 
     // Seed database
@@ -47,6 +56,9 @@ try
     app.UseSerilogRequestLogging();
 
     app.UseRouting();
+
+    // Add session middleware before authentication
+    app.UseSession();
 
     app.UseAuthentication();
     app.UseAuthorization();

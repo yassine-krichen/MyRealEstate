@@ -1,22 +1,69 @@
+/* EstateFlow Brand Colors */
+:root {
+    --estate-primary: #2563eb;
+    --estate-secondary: #10b981;
+    --estate-accent: #f59e0b;
+    --estate-dark: #1e293b;
+    --estate-light: #f8fafc;
+}
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow:
+        0 0 0 0.1rem white,
+        0 0 0 0.25rem var(--estate-primary);
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+/* EstateFlow Custom Styles */
+.bg-primary {
+    background-color: var(--estate-primary) !important;
+}
+
+.text-primary {
+    color: var(--estate-primary) !important;
+}
+
+.btn-primary {
+    background-color: var(--estate-primary);
+    border-color: var(--estate-primary);
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.btn-success {
+    background-color: var(--estate-secondary);
+    border-color: var(--estate-secondary);
+}
+
+.badge.bg-primary {
+    background-color: var(--estate-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--estate-primary) !important;
 }

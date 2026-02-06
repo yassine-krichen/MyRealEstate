@@ -57,7 +57,7 @@ public static class DatabaseSeeder
 
     private static async Task SeedAdminUserAsync(UserManager<User> userManager)
     {
-        const string adminEmail = "admin@myrealestate.com";
+        const string adminEmail = "admin@estateflow.com";
         const string adminPassword = "Admin@123456";
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
@@ -85,8 +85,8 @@ public static class DatabaseSeeder
     {
         var agents = new[]
         {
-            new { Email = "agent1@myrealestate.com", FullName = "Ahmed Ben Ali", Password = "Agent@123456" },
-            new { Email = "agent2@myrealestate.com", FullName = "Fatma Mansour", Password = "Agent@123456" }
+            new { Email = "agent1@estateflow.com", FullName = "Ahmed Ben Ali", Password = "Agent@123456" },
+            new { Email = "agent2@estateflow.com", FullName = "Fatma Mansour", Password = "Agent@123456" }
         };
 
         foreach (var agentData in agents)
@@ -117,10 +117,10 @@ public static class DatabaseSeeder
     {
         var contentKeys = new Dictionary<string, string>
         {
-            { "HomeHero", "<h1>Welcome to MyRealEstate</h1><p>Your trusted partner in finding the perfect property.</p>" },
+            { "HomeHero", "<h1>Welcome to EstateFlow</h1><p>Your trusted partner in finding the perfect property.</p>" },
             { "AboutHtml", "<h2>About Us</h2><p>We are a leading real estate company dedicated to helping you find your dream home.</p>" },
-            { "FooterText", "<p>&copy; 2026 MyRealEstate. All rights reserved.</p>" },
-            { "ContactInfo", "<p>Email: contact@myrealestate.com<br/>Phone: +216 XX XXX XXX</p>" }
+            { "FooterText", "<p>&copy; 2026 EstateFlow. All rights reserved.</p>" },
+            { "ContactInfo", "<p>Email: contact@estateflow.com<br/>Phone: +216 XX XXX XXX</p>" }
         };
 
         foreach (var (key, value) in contentKeys)
@@ -147,128 +147,214 @@ public static class DatabaseSeeder
             return; // Properties already seeded
         }
 
-        var adminUser = await userManager.FindByEmailAsync("admin@myrealestate.com");
+        var adminUser = await userManager.FindByEmailAsync("admin@estateflow.com");
         if (adminUser == null) return;
 
-        var properties = new[]
+        var property1 = new Property
         {
-            new Property
+            Id = Guid.NewGuid(),
+            Title = "Luxury Villa in La Marsa",
+            Description = "Stunning 4-bedroom villa with sea view, private pool, and modern amenities. Located in the prestigious La Marsa neighborhood with easy access to beaches and shopping centers. The property features marble floors, high ceilings, and a spacious garden perfect for entertaining.",
+            Price = new Money(850000, "TND"),
+            PropertyType = "Villa",
+            Status = PropertyStatus.Published,
+            Bedrooms = 4,
+            Bathrooms = 3,
+            AreaSqM = 320,
+            Address = new Address(
+                line1: "15 Avenue Habib Bourguiba",
+                city: "La Marsa",
+                country: "Tunisia",
+                postalCode: "2078",
+                latitude: 36.8774m,
+                longitude: 10.3247m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-30),
+            UpdatedAt = DateTime.UtcNow.AddDays(-5)
+        };
+
+        var property2 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Modern Apartment in Lac 2",
+            Description = "Spacious 3-bedroom apartment in the heart of Tunis business district. Features include contemporary design, central air conditioning, fitted kitchen, and secure underground parking. Walking distance to restaurants and shops.",
+            Price = new Money(450000, "TND"),
+            PropertyType = "Apartment",
+            Status = PropertyStatus.Published,
+            Bedrooms = 3,
+            Bathrooms = 2,
+            AreaSqM = 180,
+            Address = new Address(
+                line1: "Résidence Les Pins, Lac 2",
+                city: "Tunis",
+                country: "Tunisia",
+                postalCode: "1053",
+                latitude: 36.8380m,
+                longitude: 10.2344m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-20),
+            UpdatedAt = DateTime.UtcNow.AddDays(-3)
+        };
+
+        var property3 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Charming House in Sidi Bou Said",
+            Description = "Traditional Tunisian house with stunning blue and white architecture, offering panoramic views of the Mediterranean Sea. This 3-bedroom property has been tastefully renovated while preserving authentic details like arched doorways and hand-painted tiles.",
+            Price = new Money(620000, "TND"),
+            PropertyType = "House",
+            Status = PropertyStatus.Published,
+            Bedrooms = 3,
+            Bathrooms = 2,
+            AreaSqM = 220,
+            Address = new Address(
+                line1: "Rue Sidi Chabaane",
+                city: "Sidi Bou Said",
+                country: "Tunisia",
+                postalCode: "2026",
+                latitude: 36.8686m,
+                longitude: 10.3419m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-15),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var property4 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Cozy Studio in Carthage",
+            Description = "Perfect for young professionals or students. This well-maintained studio offers efficient use of space with a kitchenette, modern bathroom, and plenty of natural light. Close to universities and public transport.",
+            Price = new Money(180000, "TND"),
+            PropertyType = "Studio",
+            Status = PropertyStatus.Published,
+            Bedrooms = 0,
+            Bathrooms = 1,
+            AreaSqM = 45,
+            Address = new Address(
+                line1: "Avenue de la République",
+                city: "Carthage",
+                country: "Tunisia",
+                postalCode: "2016",
+                latitude: 36.8531m,
+                longitude: 10.3231m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-10),
+            UpdatedAt = DateTime.UtcNow.AddDays(-2)
+        };
+
+        var property5 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Elegant Duplex in Gammarth",
+            Description = "Luxurious 5-bedroom duplex in exclusive Gammarth area. Features include a private rooftop terrace with sea views, designer kitchen with premium appliances, home office, and state-of-the-art security system. Gated community with 24/7 security.",
+            Price = new Money(1200000, "TND"),
+            PropertyType = "Duplex",
+            Status = PropertyStatus.Draft,
+            Bedrooms = 5,
+            Bathrooms = 4,
+            AreaSqM = 380,
+            Address = new Address(
+                line1: "Résidence Gammarth Beach",
+                city: "Gammarth",
+                country: "Tunisia",
+                postalCode: "2070",
+                latitude: 36.9108m,
+                longitude: 10.2908m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-5)
+        };
+
+        await context.Properties.AddRangeAsync(new[] { property1, property2, property3, property4, property5 });
+        await context.SaveChangesAsync();
+
+        // Add property images
+        var propertyImages = new List<PropertyImage>
+        {
+            // Luxury Villa images
+            new PropertyImage
             {
                 Id = Guid.NewGuid(),
-                Title = "Luxury Villa in La Marsa",
-                Description = "Stunning 4-bedroom villa with sea view, private pool, and modern amenities. Located in the prestigious La Marsa neighborhood with easy access to beaches and shopping centers. The property features marble floors, high ceilings, and a spacious garden perfect for entertaining.",
-                Price = new Money(850000, "TND"),
-                PropertyType = "Villa",
-                Status = PropertyStatus.Published,
-                Bedrooms = 4,
-                Bathrooms = 3,
-                AreaSqM = 320,
-                Address = new Address(
-                    line1: "15 Avenue Habib Bourguiba",
-                    city: "La Marsa",
-                    country: "Tunisia",
-                    postalCode: "2078",
-                    latitude: 36.8774m,
-                    longitude: 10.3247m
-                ),
-                AgentId = adminUser.Id,
-                CreatedAt = DateTime.UtcNow.AddDays(-30),
-                UpdatedAt = DateTime.UtcNow.AddDays(-5)
+                PropertyId = property1.Id,
+                FilePath = "/images/properties/Luxury Villa 1.jpg",
+                FileName = "Luxury Villa 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
             },
-            new Property
+            new PropertyImage
             {
                 Id = Guid.NewGuid(),
-                Title = "Modern Apartment in Lac 2",
-                Description = "Spacious 3-bedroom apartment in the heart of Tunis business district. Features include contemporary design, central air conditioning, fitted kitchen, and secure underground parking. Walking distance to restaurants and shops.",
-                Price = new Money(450000, "TND"),
-                PropertyType = "Apartment",
-                Status = PropertyStatus.Published,
-                Bedrooms = 3,
-                Bathrooms = 2,
-                AreaSqM = 180,
-                Address = new Address(
-                    line1: "Résidence Les Pins, Lac 2",
-                    city: "Tunis",
-                    country: "Tunisia",
-                    postalCode: "1053",
-                    latitude: 36.8380m,
-                    longitude: 10.2344m
-                ),
-                AgentId = adminUser.Id,
-                CreatedAt = DateTime.UtcNow.AddDays(-20),
-                UpdatedAt = DateTime.UtcNow.AddDays(-3)
+                PropertyId = property1.Id,
+                FilePath = "/images/properties/Luxury Villa 2.jpg",
+                FileName = "Luxury Villa 2.jpg",
+                IsMain = false,
+                CreatedAt = DateTime.UtcNow
             },
-            new Property
+            // Modern Apartment images
+            new PropertyImage
             {
                 Id = Guid.NewGuid(),
-                Title = "Charming House in Sidi Bou Said",
-                Description = "Traditional Tunisian house with stunning blue and white architecture, offering panoramic views of the Mediterranean Sea. This 3-bedroom property has been tastefully renovated while preserving authentic details like arched doorways and hand-painted tiles.",
-                Price = new Money(620000, "TND"),
-                PropertyType = "House",
-                Status = PropertyStatus.Published,
-                Bedrooms = 3,
-                Bathrooms = 2,
-                AreaSqM = 220,
-                Address = new Address(
-                    line1: "Rue Sidi Chabaane",
-                    city: "Sidi Bou Said",
-                    country: "Tunisia",
-                    postalCode: "2026",
-                    latitude: 36.8686m,
-                    longitude: 10.3419m
-                ),
-                AgentId = adminUser.Id,
-                CreatedAt = DateTime.UtcNow.AddDays(-15),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1)
+                PropertyId = property2.Id,
+                FilePath = "/images/properties/Modern Apartment 1.jpg",
+                FileName = "Modern Apartment 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
             },
-            new Property
+            new PropertyImage
             {
                 Id = Guid.NewGuid(),
-                Title = "Cozy Studio in Carthage",
-                Description = "Perfect for young professionals or students. This well-maintained studio offers efficient use of space with a kitchenette, modern bathroom, and plenty of natural light. Close to universities and public transport.",
-                Price = new Money(180000, "TND"),
-                PropertyType = "Studio",
-                Status = PropertyStatus.Published,
-                Bedrooms = 0,
-                Bathrooms = 1,
-                AreaSqM = 45,
-                Address = new Address(
-                    line1: "Avenue de la République",
-                    city: "Carthage",
-                    country: "Tunisia",
-                    postalCode: "2016",
-                    latitude: 36.8531m,
-                    longitude: 10.3231m
-                ),
-                AgentId = adminUser.Id,
-                CreatedAt = DateTime.UtcNow.AddDays(-10),
-                UpdatedAt = DateTime.UtcNow.AddDays(-2)
+                PropertyId = property2.Id,
+                FilePath = "/images/properties/Modern Apartment 2.jpg",
+                FileName = "Modern Apartment 2.jpg",
+                IsMain = false,
+                CreatedAt = DateTime.UtcNow
             },
-            new Property
+            // Charming House images
+            new PropertyImage
             {
                 Id = Guid.NewGuid(),
-                Title = "Elegant Duplex in Gammarth",
-                Description = "Luxurious 5-bedroom duplex in exclusive Gammarth area. Features include a private rooftop terrace with sea views, designer kitchen with premium appliances, home office, and state-of-the-art security system. Gated community with 24/7 security.",
-                Price = new Money(1200000, "TND"),
-                PropertyType = "Duplex",
-                Status = PropertyStatus.Draft,
-                Bedrooms = 5,
-                Bathrooms = 4,
-                AreaSqM = 380,
-                Address = new Address(
-                    line1: "Résidence Gammarth Beach",
-                    city: "Gammarth",
-                    country: "Tunisia",
-                    postalCode: "2070",
-                    latitude: 36.9108m,
-                    longitude: 10.2908m
-                ),
-                AgentId = adminUser.Id,
-                CreatedAt = DateTime.UtcNow.AddDays(-5)
+                PropertyId = property3.Id,
+                FilePath = "/images/properties/Charming House 1.jpg",
+                FileName = "Charming House 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property3.Id,
+                FilePath = "/images/properties/Charming House 2.jpg",
+                FileName = "Charming House 2.jpg",
+                IsMain = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            // Cozy Studio image
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property4.Id,
+                FilePath = "/images/properties/Cozy Studio 1.jpg",
+                FileName = "Cozy Studio 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            // Elegant Duplex image
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property5.Id,
+                FilePath = "/images/properties/Elegant Duplex 1.jpg",
+                FileName = "Elegant Duplex 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
             }
         };
 
-        await context.Properties.AddRangeAsync(properties);
+        await context.PropertyImages.AddRangeAsync(propertyImages);
         await context.SaveChangesAsync();
     }
 
@@ -279,9 +365,9 @@ public static class DatabaseSeeder
             return; // Inquiries already seeded
         }
 
-        var agent1 = await userManager.FindByEmailAsync("agent1@myrealestate.com");
-        var agent2 = await userManager.FindByEmailAsync("agent2@myrealestate.com");
-        var adminUser = await userManager.FindByEmailAsync("admin@myrealestate.com");
+        var agent1 = await userManager.FindByEmailAsync("agent1@estateflow.com");
+        var agent2 = await userManager.FindByEmailAsync("agent2@estateflow.com");
+        var adminUser = await userManager.FindByEmailAsync("admin@estateflow.com");
         
         if (agent1 == null || agent2 == null || adminUser == null) return;
 
