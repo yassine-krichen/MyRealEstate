@@ -6,9 +6,11 @@ public class CreateInquiryCommandValidator : AbstractValidator<CreateInquiryComm
 {
     public CreateInquiryCommandValidator()
     {
+        // PropertyId is optional (nullable) - when null, it's a general inquiry
         RuleFor(x => x.PropertyId)
-            .NotEmpty()
-            .WithMessage("Property ID is required");
+            .NotEqual(Guid.Empty)
+            .WithMessage("Invalid Property ID")
+            .When(x => x.PropertyId.HasValue);
 
         RuleFor(x => x.ClientName)
             .NotEmpty()

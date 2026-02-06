@@ -139,23 +139,31 @@
                         
                         <div class="mb-3">
                             <label for="VisitorName" class="form-label">Your Name <span class="text-danger">*</span></label>
-                            <input name="VisitorName" id="VisitorName" class="form-control" required placeholder="John Doe" />
+                            <input name="VisitorName" id="VisitorName" class="form-control" required 
+                                   placeholder="John Doe" maxlength="100" />
+                            <span class="text-danger small" data-valmsg-for="VisitorName"></span>
                         </div>
 
                         <div class="mb-3">
                             <label for="VisitorEmail" class="form-label">Email <span class="text-danger">*</span></label>
-                            <input name="VisitorEmail" id="VisitorEmail" type="email" class="form-control" required placeholder="john@example.com" />
+                            <input name="VisitorEmail" id="VisitorEmail" type="email" class="form-control" required 
+                                   placeholder="john@example.com" maxlength="256" />
+                            <span class="text-danger small" data-valmsg-for="VisitorEmail"></span>
                         </div>
 
                         <div class="mb-3">
                             <label for="VisitorPhone" class="form-label">Phone</label>
-                            <input name="VisitorPhone" id="VisitorPhone" type="tel" class="form-control" placeholder="+216 XX XXX XXX" />
+                            <input name="VisitorPhone" id="VisitorPhone" type="tel" class="form-control" 
+                                   placeholder="+216 XX XXX XXX" maxlength="20" />
+                            <span class="text-danger small" data-valmsg-for="VisitorPhone"></span>
                         </div>
 
                         <div class="mb-3">
                             <label for="Message" class="form-label">Your Message <span class="text-danger">*</span></label>
                             <textarea name="Message" id="Message" class="form-control" rows="5" required 
-                                      placeholder="I'm interested in this property. I would like to schedule a viewing..."></textarea>
+                                      placeholder="I'm interested in this property. I would like to schedule a viewing..." 
+                                      minlength="10" maxlength="2000"></textarea>
+                            <span class="text-danger small" data-valmsg-for="Message"></span>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-2">

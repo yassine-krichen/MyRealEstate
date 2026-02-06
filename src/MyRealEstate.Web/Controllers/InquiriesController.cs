@@ -23,27 +23,9 @@ public class InquiriesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateInquiryViewModel model)
     {
-        // Log received data for debugging
-        _logger.LogInformation("Received inquiry: PropertyId={PropertyId}, Name={Name}, Email={Email}, Phone={Phone}, MessageLength={MessageLength}",
-            model.PropertyId, model.VisitorName, model.VisitorEmail, model.VisitorPhone, model.Message?.Length ?? 0);
-        
         if (!ModelState.IsValid)
         {
-            // Log all validation errors for debugging
-            _logger.LogWarning("ModelState is invalid. Errors:");
-            foreach (var key in ModelState.Keys)
-            {
-                var state = ModelState[key];
-                if (state?.Errors.Count > 0)
-                {
-                    foreach (var error in state.Errors)
-                    {
-                        _logger.LogWarning("Field: {Field}, Error: {Error}", key, error.ErrorMessage);
-                    }
-                }
-            }
-            
-            TempData["Error"] = "Please fill in all required fields.";
+            TempData["Error"] = "Please fill in all required fields correctly.";
             
             if (model.PropertyId.HasValue)
             {
