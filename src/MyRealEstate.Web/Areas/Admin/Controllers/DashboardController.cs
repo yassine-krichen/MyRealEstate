@@ -1,6 +1,8 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyRealEstate.Application.Queries.Analytics;
 using MyRealEstate.Domain.Enums;
 using MyRealEstate.Infrastructure.Data;
 
@@ -11,10 +13,12 @@ namespace MyRealEstate.Web.Areas.Admin.Controllers;
 public class DashboardController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
 
-    public DashboardController(ApplicationDbContext context)
+    public DashboardController(ApplicationDbContext context, IMediator mediator)
     {
         _context = context;
+        _mediator = mediator;
     }
 
     public async Task<IActionResult> Index()
@@ -65,6 +69,14 @@ public class DashboardController : Controller
                 .ToListAsync()
         };
 
+        // Get most viewed properties
+        var mostViewedQuery = new GetMostViewedPropertiesQuery
+        {
+            TopCount = 5,
+            FromDate = DateTime.UtcNow.AddDays(-30) // Last 30 days
+        };
+        viewModel.MostViewedProperties = await _mediator.Send(mostViewedQuery);
+
         return View(viewModel);
     }
 }
@@ -85,4 +97,5 @@ public class DashboardViewModel
     
     public List<MyRealEstate.Domain.Entities.Inquiry> RecentInquiries { get; set; } = new();
     public List<MyRealEstate.Domain.Entities.Property> RecentProperties { get; set; } = new();
+    public List<MyRealEstate.Application.Interfaces.PropertyViewStats> MostViewedProperties { get; set; } = new();
 }
