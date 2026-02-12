@@ -5,10 +5,7 @@
 <!-- Hero Section -->
 <div class="bg-primary text-white py-5">
     <div class="container text-center py-5">
-        <h1 class="display-3 fw-bold mb-3">Find Your Dream Property</h1>
-        <p class="lead mb-4">
-            Discover exclusive real estate listings in Tunisia's most sought-after locations
-        </p>
+        @Html.Raw(ViewBag.HomeHero)
         <div class="d-grid gap-2 d-md-flex justify-content-center">
             <a asp-controller="Properties" asp-action="Index" class="btn btn-light btn-lg px-5">
                 <i class="bi bi-search"></i> Browse Properties

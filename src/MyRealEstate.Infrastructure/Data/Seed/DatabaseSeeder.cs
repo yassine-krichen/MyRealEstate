@@ -123,9 +123,9 @@ public static class DatabaseSeeder
     {
         var contentKeys = new Dictionary<string, string>
         {
-            { "HomeHero", "<h1>Welcome to EstateFlow</h1><p>Your trusted partner in finding the perfect property.</p>" },
+            { "HomeHero", "<h1 class=\"display-3 fw-bold mb-3\">Find Your Dream Property</h1><p class=\"lead mb-4\">Discover exclusive real estate listings in Tunisia's most sought-after locations</p>" },
             { "AboutHtml", "<h2>About Us</h2><p>We are a leading real estate company dedicated to helping you find your dream home.</p>" },
-            { "FooterText", "<p>&copy; 2026 EstateFlow. All rights reserved.</p>" },
+            { "FooterText", "&copy; @YEAR - EstateFlow Admin Portal" },
             { "ContactInfo", "<p>Email: contact@estateflow.com<br/>Phone: +216 XX XXX XXX</p>" }
         };
 

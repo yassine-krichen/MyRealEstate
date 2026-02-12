@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MyRealEstate.Application.Queries.Content;
 using MyRealEstate.Web.Models;
 
 namespace MyRealEstate.Web.Controllers;
@@ -7,14 +9,21 @@ namespace MyRealEstate.Web.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IMediator _mediator;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IMediator mediator)
     {
         _logger = logger;
+        _mediator = mediator;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        // Fetch HomeHero content with fallback
+        var homeHeroContent = await _mediator.Send(new GetContentByKeyQuery("HomeHero"));
+        ViewBag.HomeHero = homeHeroContent ?? 
+            "<h1 class=\"display-3 fw-bold mb-3\">Find Your Dream Property</h1><p class=\"lead mb-4\">Discover exclusive real estate listings in Tunisia's most sought-after locations</p>";
+        
         return View();
     }
 
