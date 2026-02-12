@@ -21,13 +21,13 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav flex-grow-1 justify-content-evenly">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Properties" asp-action="Index">
-                                <i class="bi bi-house-door"></i> Browse Properties
+                                Browse Properties
                             </a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
@@ -44,8 +44,21 @@
                                     <a class="nav-link text-dark" asp-area="Admin" asp-controller="Inquiries" asp-action="Index">Manage Inquiries</a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Deals" asp-action="Index">
+                                        Manage Deals
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="Admin" asp-controller="Content" asp-action="Index">
-                                        <i class="bi bi-file-earmark-text"></i> Content
+                                        Content
+                                    </a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Agent") && !User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Deals" asp-action="Index">
+                                        Manage Deals
                                     </a>
                                 </li>
                             }

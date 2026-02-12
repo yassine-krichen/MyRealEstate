@@ -67,3 +67,15 @@ body {
 .border-primary {
     border-color: var(--estate-primary) !important;
 }
+
+/* Fix for text visibility in gradient cards */
+/* .text-white h1,
+.text-white h2,
+.text-white h3,
+.text-white h4,
+.text-white h5,
+.text-white h6,
+.text-white small,
+.text-white p {
+    color: #fff !important;
+} */

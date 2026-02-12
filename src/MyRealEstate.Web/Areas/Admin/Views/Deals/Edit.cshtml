@@ -1,0 +1,162 @@
+@model MyRealEstate.Web.Models.DealEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Deal";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3">Edit Deal</h1>
+            <span class="text-muted">Property: @Model.PropertyTitle</span>
+        </div>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Details
+        </a>
+    </div>
+
+    @if (Model.Status != MyRealEstate.Domain.Enums.DealStatus.Pending)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> Only deals with <strong>Pending</strong> status can be edited.
+            This deal is currently <strong>@Model.Status</strong>.
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <h5 class="mb-3"><i class="bi bi-house-door"></i> Property</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Property</label>
+                            <input type="text" class="form-control" value="@Model.PropertyTitle" readonly disabled />
+                            <div class="form-text">
+                                <small><i class="bi bi-info-circle"></i> Property cannot be changed after a deal is created.</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+                        <h5 class="mb-3"><i class="bi bi-person"></i> Buyer Information</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="BuyerName" class="form-label"></label>
+                                <input asp-for="BuyerName" class="form-control" />
+                                <span asp-validation-for="BuyerName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="BuyerEmail" class="form-label"></label>
+                                <input asp-for="BuyerEmail" class="form-control" type="email" />
+                                <span asp-validation-for="BuyerEmail" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="BuyerPhone" class="form-label"></label>
+                            <input asp-for="BuyerPhone" class="form-control" />
+                            <span asp-validation-for="BuyerPhone" class="text-danger"></span>
+                        </div>
+
+                        <hr class="my-4" />
+                        <h5 class="mb-3"><i class="bi bi-cash-stack"></i> Financial Details</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="SalePrice" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="SalePrice" type="number" step="0.01" class="form-control" />
+                                    <span class="input-group-text">TND</span>
+                                </div>
+                                <span asp-validation-for="SalePrice" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CommissionRate" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="CommissionRate" type="number" step="0.01" class="form-control" id="commissionRate" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <span asp-validation-for="CommissionRate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <strong>Estimated Commission:</strong>
+                                <span id="calculatedCommission">0 TND</span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+                        <h5 class="mb-3"><i class="bi bi-journal-text"></i> Additional Notes</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Cancel</a>
+                            @if (Model.Status == MyRealEstate.Domain.Enums.DealStatus.Pending)
+                            {
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle"></i> Deal Status</h5>
+                    <p class="mb-2">
+                        <span class="badge @(Model.Status == MyRealEstate.Domain.Enums.DealStatus.Pending ? "bg-warning text-dark" : Model.Status == MyRealEstate.Domain.Enums.DealStatus.Completed ? "bg-success" : "bg-danger") fs-6">
+                            @Model.Status
+                        </span>
+                    </p>
+                    <small class="text-muted">Only pending deals can be edited. Use the Details page to complete or cancel a deal.</small>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-lightbulb"></i> Tips</h5>
+                    <ul class="small mb-0">
+                        <li class="mb-2">Commission will be recalculated when you change the sale price or rate</li>
+                        <li class="mb-2">The property assignment cannot be changed</li>
+                        <li>To complete or cancel this deal, go to the <a asp-action="Details" asp-route-id="@Model.Id">Details page</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function calculateCommission() {
+            const price = parseFloat(document.querySelector('[name="SalePrice"]').value) || 0;
+            const rate = parseFloat(document.getElementById('commissionRate').value) || 0;
+            const commission = price * (rate / 100);
+            document.getElementById('calculatedCommission').textContent =
+                commission.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' TND';
+        }
+
+        document.querySelector('[name="SalePrice"]').addEventListener('input', calculateCommission);
+        document.getElementById('commissionRate').addEventListener('input', calculateCommission);
+
+        // Initialize
+        calculateCommission();
+    </script>
+}

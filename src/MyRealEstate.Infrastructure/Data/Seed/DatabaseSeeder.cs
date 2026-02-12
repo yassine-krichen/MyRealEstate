@@ -40,6 +40,12 @@ public static class DatabaseSeeder
 
         // Seed inquiries with conversations
         await SeedInquiriesAsync(context, userManager);
+
+        // Seed property views (for "Most Visited" dashboard)
+        await SeedPropertyViewsAsync(context);
+
+        // Seed deals
+        await SeedDealsAsync(context, userManager);
     }
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
@@ -148,7 +154,9 @@ public static class DatabaseSeeder
         }
 
         var adminUser = await userManager.FindByEmailAsync("admin@estateflow.com");
-        if (adminUser == null) return;
+        var agent1 = await userManager.FindByEmailAsync("agent1@estateflow.com");
+        var agent2 = await userManager.FindByEmailAsync("agent2@estateflow.com");
+        if (adminUser == null || agent1 == null || agent2 == null) return;
 
         var property1 = new Property
         {
@@ -269,7 +277,79 @@ public static class DatabaseSeeder
             CreatedAt = DateTime.UtcNow.AddDays(-5)
         };
 
-        await context.Properties.AddRangeAsync(new[] { property1, property2, property3, property4, property5 });
+        var property6 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Penthouse Apartment in Les Berges du Lac",
+            Description = "Breathtaking penthouse apartment with floor-to-ceiling windows offering panoramic lake views. Features an open-plan living area with designer finishes, a chef's kitchen with premium appliances, walk-in closets, and a wraparound terrace. Building amenities include a concierge, gym, and rooftop pool.",
+            Price = new Money(950000, "TND"),
+            PropertyType = "Apartment",
+            Status = PropertyStatus.Published,
+            Bedrooms = 3,
+            Bathrooms = 3,
+            AreaSqM = 280,
+            Address = new Address(
+                line1: "Tour du Lac, Les Berges du Lac 1",
+                city: "Tunis",
+                country: "Tunisia",
+                postalCode: "1053",
+                latitude: 36.8345m,
+                longitude: 10.2290m
+            ),
+            AgentId = agent1.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-12),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var property7 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Bright Apartment with Large Windows in Ennasr",
+            Description = "Sun-drenched 2-bedroom apartment featuring oversized windows that flood the space with natural light. Modern open kitchen, hardwood floors throughout, and a generous balcony overlooking a tree-lined avenue. Excellent neighbourhood with nearby schools, parks, and shopping centres.",
+            Price = new Money(380000, "TND"),
+            PropertyType = "Apartment",
+            Status = PropertyStatus.Published,
+            Bedrooms = 2,
+            Bathrooms = 1,
+            AreaSqM = 130,
+            Address = new Address(
+                line1: "Résidence Soleil, Rue du Lac Léman",
+                city: "Ennasr",
+                country: "Tunisia",
+                postalCode: "2037",
+                latitude: 36.8450m,
+                longitude: 10.1860m
+            ),
+            AgentId = agent2.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-8),
+            UpdatedAt = DateTime.UtcNow.AddDays(-2)
+        };
+
+        var property8 = new Property
+        {
+            Id = Guid.NewGuid(),
+            Title = "Scandinavian-Style Apartment in Marsa Plage",
+            Description = "Beautifully renovated apartment embracing Scandinavian design principles — clean lines, light wood, and a calming neutral palette. The open living area connects seamlessly to a minimalist kitchen. Two peaceful bedrooms, a spa-inspired bathroom, and a private patio for morning coffee just steps from the beach.",
+            Price = new Money(290000, "TND"),
+            PropertyType = "Apartment",
+            Status = PropertyStatus.Published,
+            Bedrooms = 2,
+            Bathrooms = 1,
+            AreaSqM = 110,
+            Address = new Address(
+                line1: "12 Rue de la Plage",
+                city: "La Marsa",
+                country: "Tunisia",
+                postalCode: "2078",
+                latitude: 36.8790m,
+                longitude: 10.3300m
+            ),
+            AgentId = adminUser.Id,
+            CreatedAt = DateTime.UtcNow.AddDays(-6),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+
+        await context.Properties.AddRangeAsync(new[] { property1, property2, property3, property4, property5, property6, property7, property8 });
         await context.SaveChangesAsync();
 
         // Add property images
@@ -350,6 +430,63 @@ public static class DatabaseSeeder
                 FilePath = "/images/properties/Elegant Duplex 1.jpg",
                 FileName = "Elegant Duplex 1.jpg",
                 IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            // Penthouse Apartment images
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property6.Id,
+                FilePath = "/images/properties/Penthouse Apartment Interior 1.jpg",
+                FileName = "Penthouse Apartment Interior 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property6.Id,
+                FilePath = "/images/properties/Penthouse Apartment Interior 2.jpg",
+                FileName = "Penthouse Apartment Interior 2.jpg",
+                IsMain = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            // Apartment With Large Windows images
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property7.Id,
+                FilePath = "/images/properties/Apartment With Large Windows Interior 1.jpg",
+                FileName = "Apartment With Large Windows Interior 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property7.Id,
+                FilePath = "/images/properties/Apartment With Large Windows Interior 2.jpg",
+                FileName = "Apartment With Large Windows Interior 2.jpg",
+                IsMain = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            // Scandinavian Apartment images
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property8.Id,
+                FilePath = "/images/properties/Scandinavian Apartment Interior 1.jpg",
+                FileName = "Scandinavian Apartment Interior 1.jpg",
+                IsMain = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new PropertyImage
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property8.Id,
+                FilePath = "/images/properties/Scandinavian Apartment Interior 2.jpg",
+                FileName = "Scandinavian Apartment Interior 2.jpg",
+                IsMain = false,
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -572,6 +709,216 @@ public static class DatabaseSeeder
         });
 
         await context.ConversationMessages.AddRangeAsync(conversationMessages);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedPropertyViewsAsync(ApplicationDbContext context)
+    {
+        if (await context.PropertyViews.AnyAsync())
+        {
+            return; // Property views already seeded
+        }
+
+        var properties = await context.Properties.OrderBy(p => p.CreatedAt).ToListAsync();
+        if (!properties.Any()) return;
+
+        var random = new Random(42); // Fixed seed for deterministic data
+        var propertyViews = new List<PropertyView>();
+
+        // Define view counts per property to create a realistic "Most Visited" ranking
+        // property index → approximate view count
+        var viewDistribution = new Dictionary<int, int>
+        {
+            { 0, 32 },  // Luxury Villa — popular listing
+            { 1, 18 },  // Modern Apartment
+            { 2, 28 },  // Charming House — high interest
+            { 3,  8 },  // Cozy Studio
+            { 4,  3 },  // Elegant Duplex (Draft — few organic views)
+            { 5, 45 },  // Penthouse Apartment — most viewed
+            { 6, 22 },  // Large Windows Apartment
+            { 7, 15 },  // Scandinavian Apartment
+        };
+
+        var userAgents = new[]
+        {
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/125.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) Safari/605.1.15",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) Mobile/15E148",
+            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124.0",
+            "Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15"
+        };
+
+        foreach (var kvp in viewDistribution)
+        {
+            if (kvp.Key >= properties.Count) continue;
+
+            var property = properties[kvp.Key];
+            var viewCount = kvp.Value;
+
+            for (int i = 0; i < viewCount; i++)
+            {
+                var daysAgo = random.Next(0, 28);   // Within last 28 days
+                var hoursOffset = random.Next(0, 24);
+                var minutesOffset = random.Next(0, 60);
+
+                propertyViews.Add(new PropertyView
+                {
+                    Id = Guid.NewGuid(),
+                    PropertyId = property.Id,
+                    SessionId = Guid.NewGuid().ToString("N")[..20],
+                    IpAddress = $"192.168.{random.Next(1, 255)}.{random.Next(1, 255)}",
+                    UserAgent = userAgents[random.Next(userAgents.Length)],
+                    ViewedAt = DateTime.UtcNow
+                        .AddDays(-daysAgo)
+                        .AddHours(-hoursOffset)
+                        .AddMinutes(-minutesOffset),
+                    CreatedAt = DateTime.UtcNow
+                        .AddDays(-daysAgo)
+                        .AddHours(-hoursOffset)
+                        .AddMinutes(-minutesOffset)
+                });
+            }
+        }
+
+        await context.PropertyViews.AddRangeAsync(propertyViews);
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedDealsAsync(ApplicationDbContext context, UserManager<User> userManager)
+    {
+        if (await context.Deals.AnyAsync())
+        {
+            return; // Deals already seeded
+        }
+
+        var agent1 = await userManager.FindByEmailAsync("agent1@estateflow.com");
+        var agent2 = await userManager.FindByEmailAsync("agent2@estateflow.com");
+
+        if (agent1 == null || agent2 == null) return;
+
+        var properties = await context.Properties.OrderBy(p => p.CreatedAt).ToListAsync();
+        if (properties.Count < 4) return;
+
+        var inquiries = await context.Inquiries.OrderBy(i => i.CreatedAt).ToListAsync();
+
+        // --- Deal 1: Completed deal on "Luxury Villa in La Marsa" ---
+        var deal1 = new Deal
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = properties[0].Id,       // Luxury Villa in La Marsa
+            InquiryId = inquiries.Count >= 5 ? inquiries[4].Id : null,  // Youssef Slimani (Closed inquiry)
+            AgentId = agent1.Id,
+            BuyerName = "Youssef Slimani",
+            BuyerEmail = "youssef.slimani@email.com",
+            BuyerPhone = "+216 97 555 666",
+            SalePrice = 820000m,
+            CommissionPercent = 5.0m,
+            Notes = "Final price negotiated down from 850,000 TND. Buyer was very responsive throughout the process.",
+            Status = DealStatus.Completed,
+            CreatedAt = DateTime.UtcNow.AddDays(-25),
+            UpdatedAt = DateTime.UtcNow.AddDays(-8),
+            ClosedAt = DateTime.UtcNow.AddDays(-8)
+        };
+        deal1.CalculateCommission();
+
+        // Mark property as Sold
+        properties[0].MarkAsSold(deal1.Id);
+
+        // --- Deal 2: Completed deal on "Cozy Studio in Carthage" ---
+        var deal2 = new Deal
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = properties[3].Id,       // Cozy Studio in Carthage
+            InquiryId = null,
+            AgentId = agent2.Id,
+            BuyerName = "Nadia Cherif",
+            BuyerEmail = "nadia.cherif@email.com",
+            BuyerPhone = "+216 50 123 456",
+            SalePrice = 175000m,
+            CommissionPercent = 4.5m,
+            Notes = "Quick sale — buyer was pre-approved for financing. Closed in under 2 weeks.",
+            Status = DealStatus.Completed,
+            CreatedAt = DateTime.UtcNow.AddDays(-18),
+            UpdatedAt = DateTime.UtcNow.AddDays(-12),
+            ClosedAt = DateTime.UtcNow.AddDays(-12)
+        };
+        deal2.CalculateCommission();
+
+        properties[3].MarkAsSold(deal2.Id);
+
+        // --- Deal 3: Pending deal on "Modern Apartment in Lac 2" ---
+        var deal3 = new Deal
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = properties[1].Id,       // Modern Apartment in Lac 2
+            InquiryId = inquiries.Count >= 2 ? inquiries[1].Id : null,  // Salma Hamdi inquiry
+            AgentId = agent1.Id,
+            BuyerName = "Salma Hamdi",
+            BuyerEmail = "salma.hamdi@email.com",
+            BuyerPhone = "+216 22 111 222",
+            SalePrice = 440000m,
+            CommissionPercent = 5.0m,
+            Notes = "Buyer negotiating final terms. Awaiting bank loan confirmation.",
+            Status = DealStatus.Pending,
+            CreatedAt = DateTime.UtcNow.AddDays(-4)
+        };
+        deal3.CalculateCommission();
+
+        properties[1].MarkAsSold(deal3.Id);
+
+        // Close the linked inquiry
+        if (inquiries.Count >= 2)
+        {
+            inquiries[1].Close(deal3.Id);
+        }
+
+        // --- Deal 4: Pending deal on "Charming House in Sidi Bou Said" ---
+        var deal4 = new Deal
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = properties[2].Id,       // Charming House in Sidi Bou Said
+            InquiryId = inquiries.Count >= 3 ? inquiries[2].Id : null,  // Karim Bouazizi inquiry
+            AgentId = agent2.Id,
+            BuyerName = "Karim Bouazizi",
+            BuyerEmail = "karim.bouazizi@email.com",
+            BuyerPhone = "+216 55 333 444",
+            SalePrice = 600000m,
+            CommissionPercent = 4.0m,
+            Notes = "Buyer relocating from France. Documents being translated and authenticated.",
+            Status = DealStatus.Pending,
+            CreatedAt = DateTime.UtcNow.AddDays(-2)
+        };
+        deal4.CalculateCommission();
+
+        properties[2].MarkAsSold(deal4.Id);
+
+        if (inquiries.Count >= 3)
+        {
+            inquiries[2].Close(deal4.Id);
+        }
+
+        // --- Deal 5: Cancelled deal (was for "Elegant Duplex in Gammarth" but fell through) ---
+        var deal5 = new Deal
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = properties[4].Id,       // Elegant Duplex in Gammarth
+            InquiryId = null,
+            AgentId = agent1.Id,
+            BuyerName = "Rami Jouini",
+            BuyerEmail = "rami.jouini@email.com",
+            BuyerPhone = "+216 92 444 777",
+            SalePrice = 1150000m,
+            CommissionPercent = 3.5m,
+            Notes = "Buyer initially agreed on price but withdrew after inspection.\n\n--- Cancellation Reason ---\nBuyer's financing fell through due to bank policy changes.",
+            Status = DealStatus.Cancelled,
+            CreatedAt = DateTime.UtcNow.AddDays(-15),
+            UpdatedAt = DateTime.UtcNow.AddDays(-10)
+        };
+        deal5.CalculateCommission();
+
+        // Property stays Draft (reverted after cancellation)
+
+        await context.Deals.AddRangeAsync(new[] { deal1, deal2, deal3, deal4, deal5 });
         await context.SaveChangesAsync();
     }
 

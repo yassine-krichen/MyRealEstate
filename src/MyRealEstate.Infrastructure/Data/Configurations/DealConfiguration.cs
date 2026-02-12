@@ -23,6 +23,15 @@ public class DealConfiguration : IEntityTypeConfiguration<Deal>
         builder.Property(d => d.BuyerName)
             .HasMaxLength(200);
 
+        builder.Property(d => d.BuyerEmail)
+            .HasMaxLength(255);
+
+        builder.Property(d => d.BuyerPhone)
+            .HasMaxLength(50);
+
+        builder.Property(d => d.Notes)
+            .HasMaxLength(2000);
+
         // Relationships
         builder.HasOne(d => d.Property)
             .WithMany()
@@ -34,9 +43,15 @@ public class DealConfiguration : IEntityTypeConfiguration<Deal>
             .HasForeignKey(d => d.AgentId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(d => d.Inquiry)
+            .WithMany()
+            .HasForeignKey(d => d.InquiryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Indexes (as per SCHEMAS.md)
         builder.HasIndex(d => d.AgentId);
         builder.HasIndex(d => d.ClosedAt);
+        builder.HasIndex(d => d.Status);
         builder.HasIndex(d => new { d.AgentId, d.ClosedAt });
     }
 }

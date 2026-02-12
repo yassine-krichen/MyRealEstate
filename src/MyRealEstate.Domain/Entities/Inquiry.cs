@@ -74,6 +74,17 @@ public class Inquiry : BaseEntity, ISoftDelete
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Reopen()
+    {
+        if (Status != InquiryStatus.Closed)
+            throw new InvalidOperationException("Only closed inquiries can be reopened");
+
+        Status = InquiryStatus.InProgress;
+        ClosedAt = null;
+        RelatedDealId = null;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void SoftDelete()
     {
         IsDeleted = true;

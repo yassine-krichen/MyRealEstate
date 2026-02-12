@@ -1,0 +1,206 @@
+@model MyRealEstate.Web.Models.DealSearchViewModel
+
+@{
+    ViewData["Title"] = "Deals";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Deals</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create New Deal
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Filter Panel -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="0" selected="@(Model.Status?.ToString() == "Pending")">Pending</option>
+                        <option value="1" selected="@(Model.Status?.ToString() == "Completed")">Completed</option>
+                        <option value="2" selected="@(Model.Status?.ToString() == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Agent</label>
+                    <select name="agentId" class="form-select">
+                        <option value="">All Agents</option>
+                        @if (ViewBag.Agents != null)
+                        {
+                            foreach (var agent in ViewBag.Agents)
+                            {
+                                <option value="@agent.Id" selected="@(Model.AgentId?.ToString() == agent.Id.ToString())">@agent.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" class="form-control" placeholder="Buyer or property..." value="@Model.SearchTerm" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deals Table -->
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted">Total: @Model.TotalCount deals</p>
+
+            @if (Model.Results.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Buyer</th>
+                                <th>Agent</th>
+                                <th>Sale Price</th>
+                                <th>Commission</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var deal in Model.Results)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@deal.PropertyTitle</strong><br />
+                                        @if (!string.IsNullOrEmpty(deal.PropertyCity))
+                                        {
+                                            <small class="text-muted"><i class="bi bi-geo-alt"></i> @deal.PropertyCity</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @deal.BuyerName
+                                        @if (!string.IsNullOrEmpty(deal.BuyerEmail))
+                                        {
+                                            <br /><small class="text-muted">@deal.BuyerEmail</small>
+                                        }
+                                    </td>
+                                    <td>@deal.AgentName</td>
+                                    <td>
+                                        <strong>@deal.SalePrice.ToString("N0") TND</strong>
+                                    </td>
+                                    <td>
+                                        @if (deal.CommissionAmount.HasValue)
+                                        {
+                                            <span>@deal.CommissionAmount.Value.ToString("N0") TND</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (deal.Status)
+                                        {
+                                            case MyRealEstate.Domain.Enums.DealStatus.Pending:
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.DealStatus.Completed:
+                                                <span class="badge bg-success">Completed</span>
+                                                break;
+                                            case MyRealEstate.Domain.Enums.DealStatus.Cancelled:
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@deal.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                        @if (deal.ClosedAt.HasValue)
+                                        {
+                                            <br /><small class="text-muted">Closed: @deal.ClosedAt.Value.ToString("MMM dd, yyyy")</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@deal.Id"
+                                               class="btn btn-outline-primary" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            @if (deal.Status == MyRealEstate.Domain.Enums.DealStatus.Pending)
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@deal.Id"
+                                                   class="btn btn-outline-secondary" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                                   asp-route-status="@Model.Status" asp-route-agentId="@Model.AgentId" asp-route-searchTerm="@Model.SearchTerm">
+                                    Previous
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-page="@i"
+                                       asp-route-status="@Model.Status" asp-route-agentId="@Model.AgentId" asp-route-searchTerm="@Model.SearchTerm">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                                   asp-route-status="@Model.Status" asp-route-agentId="@Model.AgentId" asp-route-searchTerm="@Model.SearchTerm">
+                                    Next
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-currency-dollar display-1 text-muted"></i>
+                    <p class="mt-3 text-muted">No deals found. <a asp-action="Create">Create one now</a></p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

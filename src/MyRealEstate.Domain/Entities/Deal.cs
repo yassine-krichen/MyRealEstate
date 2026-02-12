@@ -7,6 +7,9 @@ public class Deal : BaseEntity
     public Guid PropertyId { get; set; }
     public Property Property { get; set; } = null!;
     
+    public Guid? InquiryId { get; set; }
+    public Inquiry? Inquiry { get; set; }
+    
     public Guid AgentId { get; set; }
     public User Agent { get; set; } = null!;
     
@@ -16,7 +19,10 @@ public class Deal : BaseEntity
     public decimal? CommissionAmount { get; set; }
     
     public string? BuyerName { get; set; }
-    public DateTime ClosedAt { get; set; }
+    public string? BuyerEmail { get; set; }
+    public string? BuyerPhone { get; set; }
+    public string? Notes { get; set; }
+    public DateTime? ClosedAt { get; set; }
     public DealStatus Status { get; set; } = DealStatus.Pending;
 
     // Business methods
