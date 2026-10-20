@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyRealEstate.Domain.Entities;
 using MyRealEstate.Domain.Enums;
@@ -19,6 +20,7 @@ public static class DatabaseSeeder
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
         // Apply migrations
         await context.Database.MigrateAsync();
@@ -27,10 +29,10 @@ public static class DatabaseSeeder
         await SeedRolesAsync(roleManager);
 
         // Seed admin user
-        await SeedAdminUserAsync(userManager);
+        await SeedAdminUserAsync(userManager, configuration);
 
         // Seed agent users
-        await SeedAgentUsersAsync(userManager);
+        await SeedAgentUsersAsync(userManager, configuration);
 
         // Seed sample content entries
         await SeedContentEntriesAsync(context);
@@ -48,6 +50,20 @@ public static class DatabaseSeeder
         await SeedDealsAsync(context, userManager);
     }
 
+    // Seed credentials come from configuration (user-secrets or environment) so no
+    // password is stored in source control.
+    private static string GetRequiredSeedPassword(IConfiguration configuration, string key)
+    {
+        var value = configuration[key];
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new InvalidOperationException(
+                $"Configuration value '{key}' is required to seed demo users. " +
+                $"Set it with: dotnet user-secrets set \"{key}\" \"<password>\" --project src/MyRealEstate.Web");
+        }
+        return value;
+    }
+
     private static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
     {
         string[] roles = { AdminRole, AgentRole };
@@ -61,10 +77,10 @@ public static class DatabaseSeeder
         }
     }
 
-    private static async Task SeedAdminUserAsync(UserManager<User> userManager)
+    private static async Task SeedAdminUserAsync(UserManager<User> userManager, IConfiguration configuration)
     {
         const string adminEmail = "admin@estateflow.com";
-        const string adminPassword = "Admin@123456";
+        var adminPassword = GetRequiredSeedPassword(configuration, "Seed:AdminPassword");
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
@@ -87,12 +103,13 @@ public static class DatabaseSeeder
         }
     }
 
-    private static async Task SeedAgentUsersAsync(UserManager<User> userManager)
+    private static async Task SeedAgentUsersAsync(UserManager<User> userManager, IConfiguration configuration)
     {
+        var agentPassword = GetRequiredSeedPassword(configuration, "Seed:AgentPassword");
         var agents = new[]
         {
-            new { Email = "agent1@estateflow.com", FullName = "Ahmed Ben Ali", Password = "Agent@123456" },
-            new { Email = "agent2@estateflow.com", FullName = "Fatma Mansour", Password = "Agent@123456" }
+            new { Email = "agent1@estateflow.com", FullName = "Ahmed Ben Ali", Password = agentPassword },
+            new { Email = "agent2@estateflow.com", FullName = "Fatma Mansour", Password = agentPassword }
         };
 
         foreach (var agentData in agents)

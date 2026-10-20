@@ -101,3 +101,9 @@ coverage/
 ##############################
 *.bak
 *.backup
+
+# Local SQLite database and user uploads
+*.db
+*.db-shm
+*.db-wal
+src/MyRealEstate.Web/wwwroot/uploads/
