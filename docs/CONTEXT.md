@@ -748,7 +748,7 @@ Draft ──[Publish]──→ Published ──[CreateDeal]──→ Sold
 | `FooterText`  | Footer content            |
 | `ContactInfo` | Contact details           |
 
-**TinyMCE integration** — rich text editor with API key stored in User Secrets (not committed to source control). Includes a diagnostic endpoint (`/Admin/Content/TestApiKey`) to verify API key configuration.
+**TinyMCE integration** — rich text editor with API key stored in User Secrets (not committed to source control). Includes a development-only diagnostic endpoint (`/Admin/Content/TestApiKey`) that reports whether the key is configured without revealing any of it.
 
 **Audit trail** — every content entry records who last updated it and when.
 

@@ -13,12 +13,14 @@ public class ContentController : Controller
     private readonly IMediator _mediator;
     private readonly ILogger<ContentController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _environment;
 
-    public ContentController(IMediator mediator, ILogger<ContentController> logger, IConfiguration configuration)
+    public ContentController(IMediator mediator, ILogger<ContentController> logger, IConfiguration configuration, IWebHostEnvironment environment)
     {
         _mediator = mediator;
         _logger = logger;
         _configuration = configuration;
+        _environment = environment;
     }
 
     // GET: Admin/Content
@@ -29,24 +31,22 @@ public class ContentController : Controller
     }
 
     // GET: Admin/Content/TestApiKey - Diagnostic endpoint
+    // Development only. It reports whether the key is configured, never any part of it.
     public IActionResult TestApiKey()
     {
-        var apiKey = _configuration["TinyMCE:ApiKey"];
-        var hasKey = !string.IsNullOrEmpty(apiKey);
-        var keyLength = apiKey?.Length ?? 0;
-        var preview = hasKey ? $"{apiKey?.Substring(0, Math.Min(8, keyLength))}..." : "NOT FOUND";
-        
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var hasKey = !string.IsNullOrEmpty(_configuration["TinyMCE:ApiKey"]);
+
         return Content($@"
 TinyMCE API Key Configuration Test
 ===================================
-Has Key: {hasKey}
-Key Length: {keyLength}
-Preview: {preview}
-UserSecretsId: aba299c4-83ef-497c-987b-ff86de3514c8
+Configured: {(hasKey ? "yes" : "no")}
 
-Expected Location: %APPDATA%\Microsoft\UserSecrets\aba299c4-83ef-497c-987b-ff86de3514c8\secrets.json
-
-If 'Has Key' is False, run this command:
+If 'Configured' is no, run this command:
 dotnet user-secrets set ""TinyMCE:ApiKey"" ""your-api-key"" --project src/MyRealEstate.Web
         ", "text/plain");
     }
@@ -55,9 +55,7 @@ dotnet user-secrets set ""TinyMCE:ApiKey"" ""your-api-key"" --project src/MyReal
     public IActionResult Create()
     {
         var apiKey = _configuration["TinyMCE:ApiKey"];
-        _logger.LogInformation("TinyMCE API Key loaded: {HasKey} (Length: {Length})", 
-            !string.IsNullOrEmpty(apiKey), 
-            apiKey?.Length ?? 0);
+        _logger.LogInformation("TinyMCE API Key loaded: {HasKey}", !string.IsNullOrEmpty(apiKey));
         
         ViewBag.TinyMceApiKey = apiKey ?? "no-api-key";
         return View();
@@ -111,9 +109,7 @@ dotnet user-secrets set ""TinyMCE:ApiKey"" ""your-api-key"" --project src/MyReal
         };
 
         var apiKey = _configuration["TinyMCE:ApiKey"];
-        _logger.LogInformation("TinyMCE API Key loaded for Edit: {HasKey} (Length: {Length})", 
-            !string.IsNullOrEmpty(apiKey), 
-            apiKey?.Length ?? 0);
+        _logger.LogInformation("TinyMCE API Key loaded for Edit: {HasKey}", !string.IsNullOrEmpty(apiKey));
         
         ViewBag.TinyMceApiKey = apiKey ?? "no-api-key";
         return View(command);
